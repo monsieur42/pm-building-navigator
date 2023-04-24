@@ -1,5 +1,5 @@
 <template>
-	<g class="pmbn-floor" :class="{'-opened': floor.opened}" @mouseenter="mouseEnter">
+	<g class="pmbn-floor" :class="{'-opened': $store.getters['isOpenedFloor'](index)}" @mouseenter="mouseEnter">
 		<group v-for="(group, g_index) in floor.groups" :index="g_index" :floor="index" :key="g_index" />
 	</g>
 </template>
@@ -21,7 +21,7 @@ export default {
 	},
 	methods: {
 		mouseEnter(){
-			this.$store.dispatch('setOpen', this.index);
+			this.$store.dispatch('setActiveFloor', this.index);
 		},
 	}
 }

@@ -22,10 +22,19 @@ export default {
 </script>
 
 <style>
-.pmbn-app-container {
-	width: 100%;
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-}
+	.pmbn-app-container {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+	}
+
+	/* ELEMENT PLUS WP FIXES */
+	.pmbn-app-container input.el-input__inner,
+	.pmbn-app-container input.el-input__inner:focus {
+		border: none;
+		padding: 0px;
+		outline: none;
+		box-shadow: none;
+	}
 </style>

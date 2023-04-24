@@ -1,5 +1,5 @@
 <template>
-	<g class="pmbn-group" v-html="group.svg"></g>
+	<g class="pmbn-group" :class="{'-selected': isSelected}" v-html="group.svg" @click="selectGroup"></g>
 </template>
 
 <script>
@@ -14,7 +14,18 @@ export default {
 		group(){
 			return this.$store.getters['group'](this.floor, this.index);
 		},
+		isSelected(){
+			return this.$store.state.editor.selectedGroup && 
+				this.$store.state.editor.selectedGroup.floor === this.floor && 
+				this.$store.state.editor.selectedGroup.group === this.index;
+		},
 	},
+	methods: {
+		selectGroup(){
+			this.$store.dispatch('selectGroup', {floor: this.floor, group: this.index});
+			this.$store.dispatch('setActiveTab', 'apartment');
+		},
+	}
 }
 </script>
 
@@ -29,5 +40,9 @@ export default {
 	}
 	.pmbn-group:hover {
 		filter: brightness(0.85);
+	}
+	.pmbn-group.-selected,
+	.pmbn-group.-selected:hover {
+		filter: brightness(0.75);
 	}
 </style>
