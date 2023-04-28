@@ -1,10 +1,12 @@
 import { createStore } from 'vuex';
+import { toRaw } from 'vue';
 import _ from 'lodash';
 import $ from 'jquery';
 
 export default function createAppStore() {
   return createStore({
 	state: {
+		loaded: false,
 		mode: 'editor',
 		building: {
 			floors: [],
@@ -19,6 +21,9 @@ export default function createAppStore() {
 		},
 	},
 	mutations: {
+		setLoaded(state){
+			state.loaded = true;
+		},
 		loadBuilding(state, building){
 			state.building = building;
 		},
@@ -42,11 +47,14 @@ export default function createAppStore() {
 		},
 	},
 	actions: {
-		loadConfig(context, config){
-			context.dispatch('loadSVG', config.config.svg);
-			context.dispatch('loadEditor', {
-				activeFloor: context.state.building.floors.length - 1,
-			});
+		setLoaded(context){
+			context.commit('setLoaded');
+		},
+		loadConfig(context, config){console.log(config);
+			context.dispatch('loadBuilding', (config.building ?? {}));
+			context.dispatch('loadEditor', (config.editor ?? {}));
+
+			context.dispatch('setLoaded');
 		},
 		loadSVG(context, svg){
 			let $svg = $(svg).filter('svg').first();
@@ -93,7 +101,14 @@ export default function createAppStore() {
 				});
 			}
 
-			context.commit('loadBuilding', building);
+			context.dispatch('loadBuilding', building);
+			context.dispatch('loadEditor', {
+				activeFloor: context.state.building.floors.length - 1,
+			});
+			context.dispatch('setLoaded');
+		},
+		loadBuilding(context, buildingState){
+			context.commit('loadBuilding', _.merge(context.state.building, buildingState));
 		},
 		loadEditor(context, editorState){
 			context.commit('loadEditor', _.merge(context.state.editor, editorState));
@@ -115,6 +130,15 @@ export default function createAppStore() {
 		},
 	},
 	getters: {
+		loaded(state){
+			return state.loaded;
+		},
+		config(state){
+			return {
+				building: toRaw(state.building),
+				editor: toRaw(state.editor),
+			};
+		},
 		building(state){
 			return state.building;
 		},

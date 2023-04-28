@@ -16,7 +16,35 @@ export default {
 		editor
 	},
 	mounted(){
-		
+
+	},
+	data(){
+		return {
+			saveTO: null,
+		};
+	},
+	methods: {
+		save(){
+			clearTimeout(this.saveTO);
+			this.saveTO = setTimeout(() => {
+				let promises = [];
+				this.$eventBus.emit('save', null, this.$store.getters['config'], promises);
+			}, 1000);
+		},
+	},
+	watch: {
+		'$store.state.building': {
+			handler(){
+				this.save();
+			},
+			deep: true,
+		},
+		'$store.state.editor': {
+			handler(){
+				this.save();
+			},
+			deep: true,
+		},
 	},
 }
 </script>

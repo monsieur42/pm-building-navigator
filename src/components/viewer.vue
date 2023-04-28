@@ -28,7 +28,7 @@ export default {
 		viewbox(){
 			let viewbox = [...this.$store.getters['viewbox']];
 			
-			viewbox[3] += this.$store.getters['levelSpacing'];
+			viewbox[3] = parseInt(viewbox[3]) + this.$store.getters['levelSpacing'];
 
 			return viewbox.join(' ');
 		},
