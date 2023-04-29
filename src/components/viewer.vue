@@ -28,13 +28,14 @@ export default {
 		viewbox(){
 			let viewbox = [...this.$store.getters['viewbox']];
 			
-			viewbox[3] = parseInt(viewbox[3]) + this.$store.getters['levelSpacing'];
+			viewbox[3] = parseInt(viewbox[3]) + this.$store.getters['levelSpacing'] + this.$store.getters['spaceAbove'];
 
 			return viewbox.join(' ');
 		},
 		cssVariables(){
 			return {
-				'--pmbn-level-spacing': this.$store.getters['levelSpacing']+'px',
+				'--pmbn-level-above': this.$store.getters['spaceAbove']+'px',
+				'--pmbn-level-spacing': (this.$store.getters['levelSpacing'] + this.$store.getters['spaceAbove'])+'px',
 			};
 		},
 	},

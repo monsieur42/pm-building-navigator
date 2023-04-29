@@ -12,6 +12,7 @@ export default function createAppStore() {
 				floors: [],
 				additionalSVG: [],
 				levelSpacing: 38,
+				spaceAbove: 0,
 				viewbox: [0,0,100,100],
 			},
 			editor: {
@@ -65,41 +66,61 @@ export default function createAppStore() {
 				let building = {
 					floors: [],
 					additionalSVG: [],
-					levelSpacing: 38,
+					levelSpacing: (context.state.building && context.state.building.levelSpacing)? context.state.building.levelSpacing : 38,
 					viewbox: viewbox,
 				};
 
 				if($svg.length > 0){
 					//loop floors
+					var floor_counter = 0;
 					$svg.children().each((fi, el) => {
 						if($(el).is('g')){
-							let floor = {
-								name: (typeof $(el).attr('id') !== 'undefined')? $(el).attr('id') : 'Floor ' + fi,
-								apartments: [],
-								groups: [],
-								opened: false,
-								active: false,
-							};
+							let floor = context.getters['defaultFloor']();
+							floor.name = (typeof $(el).attr('id') !== 'undefined')? $(el).attr('id') : 'Floor ' + fi;
+
+							if(context.state.building.floors && context.state.building.floors[floor_counter]){
+								floor = _.merge(floor, context.state.building.floors[floor_counter]);
+							}
+
+							let floorGroups = [];
 
 							//loop apartments
 							$(el).children().each((ai, apartment_element) => {
-								let group = {
-									name: (typeof $(apartment_element).attr('id') !== 'undefined')? $(apartment_element).attr('id') : 'Apartment ' + ai +' / '+ fi,
-									svg: $(apartment_element).prop('outerHTML'),
-									images: [],
-									selected: false,
-								};
+								let group = context.getters['defaultGroup']();
+								group.name = (typeof $(apartment_element).attr('id') !== 'undefined')? $(apartment_element).attr('id') : 'Apartment ' + ai +' / '+ fi;
+								
+								if(
+									context.state.building.floors && 
+									context.state.building.floors[floor_counter] &&
+									context.state.building.floors[floor_counter].groups[ai]
+								){
+									group = _.merge(group, context.state.building.floors[floor_counter].groups[ai]);
+								}
 
-								floor.groups.push(group);
+								group.svg = $(apartment_element).prop('outerHTML');
+
+								floorGroups.push(group);
 							});
 
+							floor.groups = floorGroups;
 							building.floors.push(floor);
+
+							floor_counter++;
 						}
 						else {
 							building.additionalSVG.push($(el).prop('outerHTML'));
 						}
 						
 					});
+				}
+
+				//if previous svg was loaded
+				if(context.state.building.floors){
+					context.state.building.floors = _.slice(context.state.building.floors, 0, building.floors.length - 1);
+				}
+				console.log(context.state.building.floors.length);
+				if(context.state.building.additionalSVG){
+					context.state.building.additionalSVG = [];
 				}
 
 				context.dispatch('loadBuilding', building);
@@ -109,6 +130,15 @@ export default function createAppStore() {
 				context.dispatch('setLoaded');
 			},
 			loadBuilding(context, buildingState){
+				_.forEach(buildingState.floors, (floor, fi) => {
+					floor = _.merge(context.getters['defaultFloor'](), floor);
+
+					_.forEach(floor.groups, (group, gi) => {
+						floor.groups[gi] = _.merge(context.getters['defaultGroup'](), group);
+					});
+					buildingState.floors[fi] = floor;
+				});
+
 				context.commit('loadBuilding', _.merge(context.state.building, buildingState));
 			},
 			loadEditor(context, editorState){
@@ -149,10 +179,23 @@ export default function createAppStore() {
 			levelSpacing(state){
 				return (state.building)? state.building.levelSpacing : 0;
 			},
+			spaceAbove(state){
+				return (state.building)? state.building.spaceAbove : 0;
+			},
 			viewbox(state){
 				return (state.building)? state.building.viewbox : [0,0,100,100];
 			},
+			svgLoaded(state){
+				let loaded = false;
+				_.forEach(state.building.floors, (floor, i) => {
+					if(floor.groups.length > 0){
+						loaded = true;
+						return false;
+					}
+				});
 
+				return loaded;
+			},
 
 			floors(state){
 				return (state.building)? state.building.floors : [];
@@ -162,8 +205,26 @@ export default function createAppStore() {
 					return (state.building)? _.find(state.building.floors, (f, i) => i === index) : null;
 				};
 			},
-			isOpenedFloor(state){
+			defaultFloor(){
+				return () => {
+					return {
+						name: '',
+						groups: [],
+						opened: false,
+						active: false,
+						passive: false,
+					};
+				};
+			},
+			isOpenedFloor(state, getters){
 				return (index) => {
+					let activeFloor = getters['activeFloor'];
+					let floor = getters['floor'](index);
+
+					if(activeFloor.passive || floor.passive){
+						return false
+					}
+
 					return index > state.editor.activeFloor;
 				};
 			},
@@ -176,6 +237,17 @@ export default function createAppStore() {
 				return (floor_index, index) => {
 					const floor =  getters['floor'](floor_index);
 					return (floor)? _.find(floor.groups, (g, i) => i === index) :  null;
+				};
+			},
+			defaultGroup(){
+				return () => {
+					return {
+						name: '',
+						svg: null,
+						images: [],
+						selected: false,
+						isApartment: false,
+					};
 				};
 			},
 			selectedGroup(state, getters){

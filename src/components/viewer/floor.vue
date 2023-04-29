@@ -1,5 +1,12 @@
 <template>
-	<g class="pmbn-floor" :class="{'-opened': $store.getters['isOpenedFloor'](index)}" @mouseenter="mouseEnter">
+	<g 
+		class="pmbn-floor"
+		:class="{
+			'-opened': $store.getters['isOpenedFloor'](index),
+			'-passive': floor.passive
+		}"
+		@mouseenter="mouseEnter"
+	>
 		<group v-for="(group, g_index) in floor.groups" :index="g_index" :floor="index" :key="g_index" />
 	</g>
 </template>
@@ -37,6 +44,6 @@ export default {
 		transition: all 500ms ease-out;
 	}
 	.pmbn-floor.-opened {
-		transform: translateY(0px);
+		transform: translateY(var(--pmbn-level-above));
 	}
 </style>

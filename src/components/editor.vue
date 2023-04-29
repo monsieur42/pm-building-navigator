@@ -1,67 +1,51 @@
 <template>
-	<div class="pmbn-editor-container">
+	<div class="pmbn-editor-container" :class="{'-full': !$store.getters['svgLoaded'] }">
 		<el-tabs v-model="$store.state.editor.activeTab" class="demo-tabs">
 			<el-tab-pane label="General" name="general">
-				<el-form-item label="Level spacing">
-					<el-slider v-model="$store.state.building.levelSpacing" :max="levelSpacingMax" @change="levelSpacingChanged" />
-				</el-form-item>
+				<general-settings />
 			</el-tab-pane>
 
-			<el-tab-pane label="Floor" name="floor" v-if="floor">
-				<el-form-item label="Floor name">
-					<el-input v-model="floor.name" />
-				</el-form-item>
+			<el-tab-pane label="Floor" name="floor" v-if="$store.getters['activeFloor']">
+				<floor-settings />
 			</el-tab-pane>
 
-			<el-tab-pane label="Apartment" name="apartment" v-if="group">
-				<el-form-item label="Apartment name">
-					<el-input v-model="group.name" />
-				</el-form-item>
-				<el-form-item label="Apartment images">
-					<gallery-field v-model="group.images" />
-				</el-form-item>
+			<el-tab-pane label="Apartment" name="apartment" v-if="$store.getters['selectedGroup']">
+				<group-settings />
 			</el-tab-pane>
 		</el-tabs>
 	</div>
 </template>
 
 <script>
-import galleryField from './editor/galleryField.vue';
-import _ from 'lodash';
+import generalSettings from './editor/generalSettings.vue';
+import floorSettings from './editor/floorSettings.vue';
+import groupSettings from './editor/groupSettings.vue';
 
 export default {
 	name: 'Editor',
-	components: {galleryField},
+	components: {generalSettings, floorSettings, groupSettings},
 	data: function(){
-		return {
-			levelSpacingMax: this.$store.getters['levelSpacing'] * 2,
-		};
+		return {};
 	},
 	computed: {
-		floor(){
-			return this.$store.getters['activeFloor'];
-		},
-		group(){
-			if(this.$store.getters['selectedGroup'] && !this.$store.getters['selectedGroup'].images){
-				this.$store.getters['selectedGroup'].images = [];
-			}
-			return this.$store.getters['selectedGroup'];
-		},
+		
 	},
 	methods: {
-		levelSpacingChanged(){
-			this.levelSpacingMax = this.$store.getters['levelSpacing'] * 2;
-		},
+		
 	},
 }
 </script>
 
 <style scoped>
+
 	.pmbn-editor-container {
 		width: 600px;
 		background-color: #fff;
 		padding: 20px;
 		border: 1px solid #c3c4c7;
+	}
+	.pmbn-editor-container.-full {
+		width: 100%;
 	}
 	.el-button .el-icon {
 		margin-right: 10px;

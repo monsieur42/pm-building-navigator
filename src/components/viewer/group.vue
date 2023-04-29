@@ -14,6 +14,9 @@ export default {
 		group(){
 			return this.$store.getters['group'](this.floor, this.index);
 		},
+		floorObj(){
+			return this.$store.getters['floor'](this.floor);
+		},
 		isSelected(){
 			return this.$store.state.editor.selectedGroup && 
 				this.$store.state.editor.selectedGroup.floor === this.floor && 
@@ -22,8 +25,10 @@ export default {
 	},
 	methods: {
 		selectGroup(){
-			this.$store.dispatch('selectGroup', {floor: this.floor, group: this.index});
-			this.$store.dispatch('setActiveTab', 'apartment');
+			if(!this.floorObj.passive){
+				this.$store.dispatch('selectGroup', {floor: this.floor, group: this.index});
+				this.$store.dispatch('setActiveTab', 'apartment');
+			}
 		},
 	}
 }
@@ -38,7 +43,7 @@ export default {
 		transition: all 300ms ease-out;
 		cursor: pointer;
 	}
-	.pmbn-group:hover {
+	.pmbn-floor:not(.-passive) .pmbn-group:hover {
 		filter: brightness(0.85);
 	}
 	.pmbn-group.-selected,

@@ -1,6 +1,6 @@
 <template>
 	<div class="pmbn-app-container">
-		<viewer />
+		<viewer v-if="$store.getters['svgLoaded']" />
 		<editor />
 	</div>
 </template>
