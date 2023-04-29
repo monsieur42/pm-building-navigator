@@ -17,15 +17,21 @@
 				<el-form-item label="Apartment name">
 					<el-input v-model="group.name" />
 				</el-form-item>
+				<el-form-item label="Apartment images">
+					<gallery-field v-model="group.images" />
+				</el-form-item>
 			</el-tab-pane>
 		</el-tabs>
 	</div>
 </template>
 
 <script>
+import galleryField from './editor/galleryField.vue';
+import _ from 'lodash';
+
 export default {
 	name: 'Editor',
-	components: {},
+	components: {galleryField},
 	data: function(){
 		return {
 			levelSpacingMax: this.$store.getters['levelSpacing'] * 2,
@@ -36,6 +42,9 @@ export default {
 			return this.$store.getters['activeFloor'];
 		},
 		group(){
+			if(this.$store.getters['selectedGroup'] && !this.$store.getters['selectedGroup'].images){
+				this.$store.getters['selectedGroup'].images = [];
+			}
 			return this.$store.getters['selectedGroup'];
 		},
 	},
@@ -53,5 +62,8 @@ export default {
 		background-color: #fff;
 		padding: 20px;
 		border: 1px solid #c3c4c7;
+	}
+	.el-button .el-icon {
+		margin-right: 10px;
 	}
 </style>

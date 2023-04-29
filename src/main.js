@@ -5,6 +5,8 @@ import 'element-plus/dist/index.css';
 
 import App from './App.vue';
 import _ from 'lodash';
+var lodash = _.noConflict();
+
 import { v4 as uuidv4 } from 'uuid';
 import eventBus  from 'js-event-bus';
 
@@ -17,7 +19,7 @@ window.pmbn = {
 	apps: [],
 };
 
-_.forEach(appContainers, (appContainer) => {
+lodash.forEach(appContainers, (appContainer) => {
 	const store = createAppStore();
 	const pluginAPI = createPluginAPI();
 
