@@ -31,6 +31,9 @@ export default function createAppStore() {
 			loadEditor(state, editorState){
 				state.editor = editorState;
 			},
+			setMode(state, mode){
+				state.mode = mode;
+			},
 
 
 			setActiveFloor(state, index){
@@ -54,6 +57,7 @@ export default function createAppStore() {
 			loadConfig(context, config){
 				context.dispatch('loadBuilding', (config.building ?? {}));
 				context.dispatch('loadEditor', (config.editor ?? {}));
+				context.dispatch('setMode', (config.mode ?? 'view'));
 
 				context.dispatch('setLoaded');
 			},
@@ -118,7 +122,7 @@ export default function createAppStore() {
 				if(context.state.building.floors){
 					context.state.building.floors = _.slice(context.state.building.floors, 0, building.floors.length - 1);
 				}
-				console.log(context.state.building.floors.length);
+				
 				if(context.state.building.additionalSVG){
 					context.state.building.additionalSVG = [];
 				}
@@ -143,6 +147,9 @@ export default function createAppStore() {
 			},
 			loadEditor(context, editorState){
 				context.commit('loadEditor', _.merge(context.state.editor, editorState));
+			},
+			setMode(context, mode){
+				context.commit('setMode', mode);
 			},
 
 
@@ -169,6 +176,9 @@ export default function createAppStore() {
 					building: toRaw(state.building),
 					editor: toRaw(state.editor),
 				};
+			},
+			mode(state){
+				return state.mode;
 			},
 			building(state){
 				return state.building;

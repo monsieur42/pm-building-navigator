@@ -1,19 +1,33 @@
 <template>
 	<div class="pmbn-app-container">
 		<viewer v-if="$store.getters['svgLoaded']" />
-		<editor />
+		<div class="pmbn-app-info-container" :class="{'-full': !$store.getters['svgLoaded'] }">
+			<el-form-item :label="$i18n('Preview')" v-if="$store.getters['mode'] !== 'view'">
+				<el-switch
+					v-model="preview"
+					class="ml-2"
+					inline-prompt
+					:active-text="$i18n('On')"
+					:inactive-text="$i18n('Off')"
+				/>
+			</el-form-item>
+			<editor v-if="$store.getters['mode'] === 'editor'" />
+			<info v-else />
+		</div>
 	</div>
 </template>
 
 <script>
 import viewer from './components/viewer.vue'
 import editor from './components/editor.vue'
+import info from './components/info.vue'
 
 export default {
 	name: 'App',
 	components: {
 		viewer,
-		editor
+		editor,
+		info
 	},
 	mounted(){
 
@@ -21,6 +35,7 @@ export default {
 	data(){
 		return {
 			saveTO: null,
+			preview: false,
 		};
 	},
 	methods: {
@@ -45,6 +60,11 @@ export default {
 			},
 			deep: true,
 		},
+		preview: {
+			handler(){
+				this.$store.dispatch('setMode', ((this.preview)? 'preview' : 'editor'));
+			},
+		},
 	},
 }
 </script>
@@ -56,6 +76,12 @@ export default {
 		justify-content: space-between;
 		align-items: flex-start;
 	}
+	.pmbn-app-info-container {
+		width: 600px;
+	}
+	.pmbn-app-info-container.-full {
+		width: 100%;
+	}
 
 	/* ELEMENT PLUS WP FIXES */
 	.pmbn-app-container input.el-input__inner,
@@ -64,5 +90,8 @@ export default {
 		padding: 0px;
 		outline: none;
 		box-shadow: none;
+	}
+	body .el-overlay {
+		z-index: 999999 !important;
 	}
 </style>

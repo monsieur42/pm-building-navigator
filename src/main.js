@@ -24,7 +24,6 @@ window.pmbn = {
 };
 const event_pmbn_before_init = new Event('pmbn_before_init');
 window.dispatchEvent(event_pmbn_before_init);
-console.log(window.pmbn);
 
 lodash.forEach(appContainers, (appContainer) => {
 	const store = createAppStore();

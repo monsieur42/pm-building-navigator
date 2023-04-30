@@ -1,5 +1,5 @@
 <template>
-	<div class="pmbn-editor-container" :class="{'-full': !$store.getters['svgLoaded'] }">
+	<div class="pmbn-editor-container">
 		<el-tabs v-model="$store.state.editor.activeTab" class="demo-tabs">
 			<el-tab-pane :label="$i18n('General', 'settings')" name="general">
 				<general-settings />
@@ -25,7 +25,9 @@ export default {
 	name: 'Editor',
 	components: {generalSettings, floorSettings, groupSettings},
 	data: function(){
-		return {};
+		return {
+			
+		};
 	},
 	computed: {
 		
@@ -37,15 +39,12 @@ export default {
 </script>
 
 <style scoped>
-
 	.pmbn-editor-container {
-		width: 600px;
+		width: 100%;
 		background-color: #fff;
 		padding: 20px;
 		border: 1px solid #c3c4c7;
-	}
-	.pmbn-editor-container.-full {
-		width: 100%;
+		box-sizing: border-box;
 	}
 	.el-button .el-icon {
 		margin-right: 10px;

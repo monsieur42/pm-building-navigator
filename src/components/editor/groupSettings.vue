@@ -27,11 +27,12 @@ export default {
 	name: 'Editor',
 	components: {galleryField},
 	data: function(){
-		return {
-			group: this.$store.getters['selectedGroup'],
-		};
+		return {};
 	},
 	computed: {
+		group(){
+			return this.$store.getters['selectedGroup'];
+		},
 		Check(){
 			return Check;
 		},
