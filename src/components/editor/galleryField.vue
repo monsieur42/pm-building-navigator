@@ -18,7 +18,7 @@
 		</template>
 	</draggable>
 	<div class="pmbn-gallery-add-wrapper">
-		<el-button plain @click="addImages" ><el-icon><Picture /></el-icon>Add images</el-button>
+		<el-button plain @click="addImages" ><el-icon><Picture /></el-icon>{{$i18n('Add images')}}</el-button>
 	</div>
 </template>
 

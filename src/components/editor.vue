@@ -1,15 +1,15 @@
 <template>
 	<div class="pmbn-editor-container" :class="{'-full': !$store.getters['svgLoaded'] }">
 		<el-tabs v-model="$store.state.editor.activeTab" class="demo-tabs">
-			<el-tab-pane label="General" name="general">
+			<el-tab-pane :label="$i18n('General', 'settings')" name="general">
 				<general-settings />
 			</el-tab-pane>
 
-			<el-tab-pane label="Floor" name="floor" v-if="$store.getters['activeFloor']">
+			<el-tab-pane :label="$i18n('Floor')" name="floor" v-if="$store.getters['activeFloor']">
 				<floor-settings />
 			</el-tab-pane>
 
-			<el-tab-pane label="Apartment" name="apartment" v-if="$store.getters['selectedGroup']">
+			<el-tab-pane :label="$i18n('Apartment')" name="apartment" v-if="$store.getters['selectedGroup']">
 				<group-settings />
 			</el-tab-pane>
 		</el-tabs>

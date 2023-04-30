@@ -11,13 +11,20 @@ import { v4 as uuidv4 } from 'uuid';
 import eventBus  from 'js-event-bus';
 
 import createAppStore from './store/store.js';
-import createPluginAPI from './pluginAPI/pluginAPI.js';
+import createPluginAPI from './services/pluginAPI.js';
+import i18n from './services/i18n.js';
 
 const appContainers = document.getElementsByClassName('pmbn-app');
 
 window.pmbn = {
 	apps: [],
+	i18n: {
+		translations: [],
+	},
 };
+const event_pmbn_before_init = new Event('pmbn_before_init');
+window.dispatchEvent(event_pmbn_before_init);
+console.log(window.pmbn);
 
 lodash.forEach(appContainers, (appContainer) => {
 	const store = createAppStore();
@@ -32,6 +39,7 @@ lodash.forEach(appContainers, (appContainer) => {
 			id: appID,
 			eventBus: appEventBus,
 		})
+		.use(i18n, window.pmbn.i18n)
 		.use(ElementPlus)
 		.mount(appContainer);
 
@@ -45,5 +53,5 @@ lodash.forEach(appContainers, (appContainer) => {
 	});
 });
 
-const event = new Event('pmbn_init');
-window.dispatchEvent(event);
+const event_pmbn_init = new Event('pmbn_init');
+window.dispatchEvent(event_pmbn_init);

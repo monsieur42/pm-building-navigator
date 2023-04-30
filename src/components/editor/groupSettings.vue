@@ -1,5 +1,5 @@
 <template>
-	<el-form-item label="Is Apartment">
+	<el-form-item :label="$i18n('Is Apartment')">
 		<el-switch
 			v-model="group.isApartment"
 			class="mt-2"
@@ -9,11 +9,11 @@
 			:inactive-icon="Close"
 		/>
 	</el-form-item>
-	<el-form-item label="Apartment name">
+	<el-form-item :label="$i18n('Apartment name')">
 		<el-input v-model="group.name" />
 	</el-form-item>
 	<template v-if="group.isApartment">
-		<el-form-item label="Apartment images">
+		<el-form-item :label="$i18n('Apartment images')">
 			<gallery-field v-model="group.images" />
 		</el-form-item>
 	</template>
@@ -27,15 +27,11 @@ export default {
 	name: 'Editor',
 	components: {galleryField},
 	data: function(){
-		return {};
+		return {
+			group: this.$store.getters['selectedGroup'],
+		};
 	},
 	computed: {
-		group(){
-			if(this.$store.getters['selectedGroup'] && !this.$store.getters['selectedGroup'].images){
-				this.$store.getters['selectedGroup'].images = [];
-			}
-			return this.$store.getters['selectedGroup'];
-		},
 		Check(){
 			return Check;
 		},

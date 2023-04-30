@@ -187,7 +187,7 @@ export default function createAppStore() {
 			},
 			svgLoaded(state){
 				let loaded = false;
-				_.forEach(state.building.floors, (floor, i) => {
+				_.forEach(state.building.floors, (floor) => {
 					if(floor.groups.length > 0){
 						loaded = true;
 						return false;

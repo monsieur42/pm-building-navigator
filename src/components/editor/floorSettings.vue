@@ -1,5 +1,5 @@
 <template>
-	<el-form-item label="Passive">
+	<el-form-item :label="$i18n('Passive')">
 		<el-switch
 			v-model="floor.passive"
 			class="mt-2"
@@ -10,7 +10,7 @@
 		/>
 	</el-form-item>
 
-	<el-form-item label="Floor name">
+	<el-form-item :label="$i18n('Floor name')">
 		<el-input v-model="floor.name" />
 	</el-form-item>
 </template>
