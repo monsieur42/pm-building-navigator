@@ -8,6 +8,7 @@ export default function createAppStore() {
 		state: {
 			loaded: false,
 			mode: 'editor',
+			clipboard: null,
 			building: {
 				floors: [],
 				additionalSVG: [],
@@ -19,6 +20,12 @@ export default function createAppStore() {
 				activeTab: 'general',
 				activeFloor: 0,
 				selectedGroup: null,
+				activeGeneralAccordion: 'graphic',
+			},
+			info: {
+				tableColumns: ['name', 'floor'],
+				currency: '',
+				rentPricePeriod: '',
 			},
 		},
 		mutations: {
@@ -30,6 +37,9 @@ export default function createAppStore() {
 			},
 			loadEditor(state, editorState){
 				state.editor = editorState;
+			},
+			loadInfo(state, infoState){
+				state.info = infoState;
 			},
 			setMode(state, mode){
 				state.mode = mode;
@@ -49,6 +59,9 @@ export default function createAppStore() {
 			setActiveTab(state, tabName){
 				state.editor.activeTab = tabName;
 			},
+			copyToClipboard(state, clipboardData){
+				state.clipboard = toRaw(clipboardData);
+			},
 		},
 		actions: {
 			setLoaded(context){
@@ -57,6 +70,7 @@ export default function createAppStore() {
 			loadConfig(context, config){
 				context.dispatch('loadBuilding', (config.building ?? {}));
 				context.dispatch('loadEditor', (config.editor ?? {}));
+				context.dispatch('loadInfo', (config.info ?? {}));
 				context.dispatch('setMode', (config.mode ?? 'view'));
 
 				context.dispatch('setLoaded');
@@ -148,6 +162,9 @@ export default function createAppStore() {
 			loadEditor(context, editorState){
 				context.commit('loadEditor', _.merge(context.state.editor, editorState));
 			},
+			loadInfo(context, infoState){
+				context.commit('loadInfo', _.merge(context.state.info, infoState));
+			},
 			setMode(context, mode){
 				context.commit('setMode', mode);
 			},
@@ -166,6 +183,17 @@ export default function createAppStore() {
 			setActiveTab(context, tabName){
 				context.commit('setActiveTab', tabName);
 			},
+			copyToClipboard(context, clipboardData){
+				context.commit('copyToClipboard', clipboardData);
+			},
+			pasteClipboardToGroup(context, group){
+				const protectProps = ['svg', 'selected'];
+				if(group && context.getters['clipboard'] && context.getters['clipboard'].type === 'group'){
+					group = _.mergeWith(group, context.getters['clipboard'].data, (objValue, srcValue, key) => {
+						return (protectProps.includes(key))? objValue : srcValue;
+					});
+				}
+			},
 		},
 		getters: {
 			loaded(state){
@@ -175,6 +203,7 @@ export default function createAppStore() {
 				return {
 					building: toRaw(state.building),
 					editor: toRaw(state.editor),
+					info: toRaw(state.info),
 				};
 			},
 			mode(state){
@@ -252,20 +281,58 @@ export default function createAppStore() {
 			defaultGroup(){
 				return () => {
 					return {
-						name: '',
 						svg: null,
-						images: [],
 						selected: false,
 						isApartment: false,
+						name: '',
+
+						rooms: 0,
+						living_area: 0,
+						garden: 0,
+						terrace: 0,
+						balcony: 0,
+
+						sale_price: 0,
+						rent_price: 0,
+						rent_overheads: 0,
+
+						available_from: null,
+						status: null,
+						registration_url: null,
+						factsheet: null,
+						images: [],
 					};
 				};
 			},
+			properties(state, getters){
+				let properties = [];
+				_.forEach(getters['floors'], (floor, fi) => {
+					_.forEach(floor.groups, (group) => {
+						if(group.isApartment){
+							properties.push({
+								...group,
+								floor: floor.name,
+								floorIndex: fi,
+							});
+						}
+					});
+				});
+
+				return properties;
+			},
+			groupStatuses(state, getters){
+				return _.compact(_.uniq(_.map(getters['properties'], _.property('status'))));
+			},
+
 			selectedGroup(state, getters){
 				return (state.editor.selectedGroup)? getters['group'](state.editor.selectedGroup.floor, state.editor.selectedGroup.group) : null;
 			},
 
 			activeTab(state){
 				return (state.editor)? state.editor.activeTab : 'general';
+			},
+			clipboard(state){
+				return state.clipboard;
 			},
 		}
 	});

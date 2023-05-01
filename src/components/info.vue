@@ -14,7 +14,7 @@
 
 		<el-dialog
 			v-for="(property, index) in properties"
-
+			:key="index"
 			:model-value="openedDialog === index"
 			:title="property.name"
 			width="30%"
@@ -31,7 +31,6 @@
 
 <script>
 import {View} from '@element-plus/icons-vue';
-import _ from 'lodash';
 
 export default {
 	name: 'Info',
@@ -43,20 +42,7 @@ export default {
 	},
 	computed: {
 		properties(){
-			let properties = [];
-			_.forEach(this.$store.getters['floors'], (floor, fi) => {
-				_.forEach(floor.groups, (group) => {
-					if(group.isApartment){
-						properties.push({
-							...group,
-							floor: floor.name,
-							floorIndex: fi,
-						});
-					}
-				});
-			});
-
-			return properties;
+			return this.$store.getters['properties'];
 		},
 	},
 	methods: {

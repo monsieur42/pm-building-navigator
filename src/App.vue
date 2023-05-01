@@ -83,6 +83,19 @@ export default {
 		width: 100%;
 	}
 
+	.pmbn-app-container .pmbn-m2,
+	.pmbn-app-container .pmbn-price-suffix {
+		display: inline-block;
+		margin: 0px 10px;
+	}
+	.pmbn-price .el-input:not(:last-child),
+	.pmbn-price .el-input-number:not(:last-child) {
+		margin-bottom: 5px;
+	}
+	.el-form-item__label {
+		width: 150px;
+	}
+
 	/* ELEMENT PLUS WP FIXES */
 	.pmbn-app-container input.el-input__inner,
 	.pmbn-app-container input.el-input__inner:focus {
@@ -90,6 +103,7 @@ export default {
 		padding: 0px;
 		outline: none;
 		box-shadow: none;
+		background-color: #fff;
 	}
 	body .el-overlay {
 		z-index: 999999 !important;
