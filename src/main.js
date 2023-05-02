@@ -19,6 +19,7 @@ const appContainers = document.getElementsByClassName('pmbn-app');
 window.pmbn = {
 	apps: [],
 	i18n: {
+		data: {locale: 'en-US'},
 		translations: [],
 	},
 };

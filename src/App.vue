@@ -60,6 +60,12 @@ export default {
 			},
 			deep: true,
 		},
+		'$store.state.info': {
+			handler(){
+				this.save();
+			},
+			deep: true,
+		},
 		preview: {
 			handler(){
 				this.$store.dispatch('setMode', ((this.preview)? 'preview' : 'editor'));
@@ -108,4 +114,12 @@ export default {
 	body .el-overlay {
 		z-index: 999999 !important;
 	}
+	.el-button,
+	a.el-button {
+		text-decoration: none;
+		color: var(--el-button-text-color);
+	}
+	a.el-button.is-plain {
+		--el-button-hover-text-color: var(--el-color-primary);
+	} 
 </style>

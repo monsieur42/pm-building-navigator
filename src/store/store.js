@@ -24,6 +24,8 @@ export default function createAppStore() {
 			},
 			info: {
 				tableColumns: ['name', 'floor'],
+				detailsFields: ['name', 'floor'],
+				filterFields: [],
 				currency: '',
 				rentPricePeriod: '',
 			},
@@ -61,6 +63,16 @@ export default function createAppStore() {
 			},
 			copyToClipboard(state, clipboardData){
 				state.clipboard = toRaw(clipboardData);
+			},
+
+			toggleInfoTableColumn(state, fieldName){
+				state.info.tableColumns = _.xor(state.info.tableColumns,[fieldName]);
+			},
+			toggleInfoDetailsField(state, fieldName){
+				state.info.detailsFields = _.xor(state.info.detailsFields,[fieldName]);
+			},
+			toggleInfoFilterField(state, fieldName){
+				state.info.filterFields = _.xor(state.info.filterFields,[fieldName]);
 			},
 		},
 		actions: {
@@ -194,6 +206,16 @@ export default function createAppStore() {
 					});
 				}
 			},
+
+			toggleInfoTableColumn(context, fieldName){
+				context.commit('toggleInfoTableColumn', fieldName);
+			},
+			toggleInfoDetailsField(context, fieldName){
+				context.commit('toggleInfoDetailsField', fieldName);
+			},
+			toggleInfoFilterField(context, fieldName){
+				context.commit('toggleInfoFilterField', fieldName);
+			},
 		},
 		getters: {
 			loaded(state){
@@ -304,8 +326,31 @@ export default function createAppStore() {
 					};
 				};
 			},
+			groupFieldNames(){
+				return ($i18n) => {
+					return {
+						name: $i18n('Apartment name'),
+						rooms: $i18n('Number of rooms'),
+						living_area: $i18n('Living area'),
+						garden: $i18n('Garden'),
+						terrace: $i18n('Terrace'),
+						balcony: $i18n('Balcony'),
+						sale_price: $i18n('Sale price'),
+						rent_price: $i18n('Rent price'),
+						rent_overheads: $i18n('Overheads'),
+						available_from: $i18n('Available from'),
+						status: $i18n('Status'),
+						registration_url: $i18n('Registration URL'),
+						factsheet: $i18n('Fact sheet'),
+						images: $i18n('Apartment images'),
+						floor: $i18n('Floor name'),
+						floorIndex: $i18n('Floor index'),
+					};
+				};
+			},
 			properties(state, getters){
 				let properties = [];
+				let propIndex = 0;
 				_.forEach(getters['floors'], (floor, fi) => {
 					_.forEach(floor.groups, (group) => {
 						if(group.isApartment){
@@ -313,7 +358,9 @@ export default function createAppStore() {
 								...group,
 								floor: floor.name,
 								floorIndex: fi,
+								propIndex: propIndex,
 							});
+							propIndex++;
 						}
 					});
 				});
@@ -333,6 +380,15 @@ export default function createAppStore() {
 			},
 			clipboard(state){
 				return state.clipboard;
+			},
+			infoTableColumns(state){
+				return state.info.tableColumns;
+			},
+			infoDetailsFields(state){
+				return state.info.detailsFields;
+			},
+			infoFilterFields(state){
+				return state.info.filterFields;
 			},
 		}
 	});
