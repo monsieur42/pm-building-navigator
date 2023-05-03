@@ -52,5 +52,21 @@ export default {
 	.pmbn-viewer-container svg {
 		width: 100%;
 		height: auto;
+		-webkit-tap-highlight-color: transparent;
+	    -webkit-touch-callout: none;
+	    -webkit-user-select: none;
+	    -khtml-user-select: none;
+	    -moz-user-select: none;
+	    -ms-user-select: none;
+	    user-select: none;
+	}
+	.pmbn-viewer-container svg:focus {
+		outline: none !important;
+	}
+	@media only screen and (max-width: 1024px) {
+		.pmbn-viewer-container {
+			width: 100%;
+			flex: auto;
+		}
 	}
 </style>

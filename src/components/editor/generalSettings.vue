@@ -36,35 +36,55 @@
 				<el-form-item :label="$i18n('Rent price period')">
 					<el-input v-model="$store.state.info.rentPricePeriod" />
 				</el-form-item>
-				<el-form-item :label="($store.getters['groupFieldNames']($i18n)[groupField])? $store.getters['groupFieldNames']($i18n)[groupField] : groupField" v-for="(groupField, gfindex) in groupFields" :key="gfindex">
-					<el-tooltip effect="dark" :content="$i18n('Display in table column')" placement="top" :hide-after="0">
-						<el-button 
-							:type="($store.getters['infoTableColumns'].includes(groupField))? 'success' : 'default' " 
-							circle 
-							@click="$store.dispatch('toggleInfoTableColumn', groupField)"
-						>
-							<el-icon><Grid /></el-icon>
-						</el-button>
-					</el-tooltip>
-					<el-tooltip effect="dark" :content="$i18n('Display apartment details')" placement="top" :hide-after="0">
-						<el-button 
-							:type="($store.getters['infoDetailsFields'].includes(groupField))? 'success' : 'default' " 
-							circle
-							@click="$store.dispatch('toggleInfoDetailsField', groupField)"
-						>
-							<el-icon><Tickets /></el-icon>
-						</el-button>
-					</el-tooltip>
-					<el-tooltip effect="dark" :content="$i18n('Display as filter option')" placement="top" :hide-after="0">
-						<el-button 
-							:type="($store.getters['infoFilterFields'].includes(groupField))? 'success' : 'default' " 
-							circle 
-							@click="$store.dispatch('toggleInfoFilterField', groupField)"
-						>
-							<el-icon><Operation /></el-icon>
-						</el-button>
-					</el-tooltip>
-				</el-form-item>
+
+				<draggable
+					:component-data="{
+						type: 'transition-group',
+						name: !dragGroupField ? 'flip-list' : null
+					}"
+					v-model="fieldOrder"
+					v-bind="dragOptions"
+					@start="dragGroupField = true"
+					@end="dragGroupField = false"
+					item-key="order"
+					handle=".el-form-item__label"
+					class="pmbn-group-fields-draggable"
+				>
+					<template #item="{ element }">
+						<el-form-item class="pmbn-group-fields-item" :label="($store.getters['groupFieldNames']($i18n)[element.field])? $store.getters['groupFieldNames']($i18n)[element.field] : element.field">
+							<el-tooltip effect="dark" :content="$i18n('Display in table column')" placement="top" :hide-after="0">
+								<el-button 
+									:type="($store.getters['infoTableColumns'].includes(element.field))? 'success' : 'default' " 
+									circle 
+									@click="$store.dispatch('toggleInfoTableColumn', element.field)"
+								>
+									<el-icon><Grid /></el-icon>
+								</el-button>
+							</el-tooltip>
+							<el-tooltip effect="dark" :content="$i18n('Display apartment details')" placement="top" :hide-after="0">
+								<el-button 
+									:type="($store.getters['infoDetailsFields'].includes(element.field))? 'success' : 'default' " 
+									circle
+									@click="$store.dispatch('toggleInfoDetailsField', element.field)"
+								>
+									<el-icon><Tickets /></el-icon>
+								</el-button>
+							</el-tooltip>
+							<el-tooltip effect="dark" :content="$i18n('Display as filter option')" placement="top" :hide-after="0">
+								<el-button 
+									:type="($store.getters['infoFilterFields'].includes(element.field))? 'success' : 'default' " 
+									circle 
+									@click="$store.dispatch('toggleInfoFilterField', element.field)"
+								>
+									<el-icon><Operation /></el-icon>
+								</el-button>
+							</el-tooltip>
+						</el-form-item>
+					</template>
+				</draggable>
+				
+
+
 			</el-collapse-item>
 		</el-collapse>
 		
@@ -96,23 +116,30 @@
 <script>
 import _ from 'lodash';
 import { Grid, Tickets, Operation } from '@element-plus/icons-vue';
+import draggable from "vuedraggable";
 
 export default {
 	name: 'Editor',
-	components: {Grid, Tickets, Operation},
+	components: {draggable, Grid, Tickets, Operation},
 	data: function(){
 		return {
 			svgInput: null,
 			levelSpacingMax: this.$store.getters['levelSpacing'] * 2,
+			dragGroupField: false,
+			loadSortedGroupFields: false,
+			fieldOrder: this.$store.getters['fieldOrder'].map((field, index) => {
+				return { field, order: index + 1 };
+			}),
 		};
 	},
 	computed: {
-		groupFields(){
-			const exludeProps = ['svg', 'selected', 'isApartment'];
-			let fields = _.difference(_.keys(this.$store.getters['defaultGroup']()), exludeProps);
-			fields.push('floor');
-			fields.push('floorIndex');
-			return fields;
+		dragOptions() {
+			return {
+				animation: 200,
+				group: "description",
+				disabled: false,
+				ghostClass: "ghost"
+			};
 		},
 	},
 	methods: {
@@ -137,11 +164,38 @@ export default {
 			reader.readAsText(file.raw)
 		},
 	},
+	watch: {
+		fieldOrder: {
+			handler(){
+				if(!this.loadSortedGroupFields){
+					this.$store.dispatch('setFieldOrder', _.map(this.fieldOrder, 'field'))
+				}
+			},
+			deep: false,
+		},
+		'$store.state.info.fieldOrder': {
+			handler(){
+				this.loadSortedGroupFields = true;
+				this.fieldOrder = this.$store.getters['fieldOrder'].map((field, index) => {
+					return { field, order: index + 1 };
+				});
+				this.$nextTick(() => {
+					this.loadSortedGroupFields = false;
+				});
+			},
+			deep: false,
+		},
+	},
 }
 </script>
 
 <style scoped>
 	.el-upload__tip {
 		line-height: 1.1;
+	}
+</style>
+<style>
+	.pmbn-group-fields-draggable .el-form-item__label {
+		cursor: move;
 	}
 </style>

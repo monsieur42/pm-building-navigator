@@ -26,6 +26,7 @@ export default function createAppStore() {
 				tableColumns: ['name', 'floor'],
 				detailsFields: ['name', 'floor'],
 				filterFields: [],
+				fieldOrder: [],
 				currency: '',
 				rentPricePeriod: '',
 			},
@@ -73,6 +74,9 @@ export default function createAppStore() {
 			},
 			toggleInfoFilterField(state, fieldName){
 				state.info.filterFields = _.xor(state.info.filterFields,[fieldName]);
+			},
+			setFieldOrder(state, fieldOrder){
+				state.info.fieldOrder = fieldOrder;
 			},
 		},
 		actions: {
@@ -176,6 +180,9 @@ export default function createAppStore() {
 			},
 			loadInfo(context, infoState){
 				context.commit('loadInfo', _.merge(context.state.info, infoState));
+
+				let defaultFieldOrder = context.getters['groupFields']();
+				context.state.info.fieldOrder = _.uniq(_.merge(defaultFieldOrder, context.state.info.fieldOrder));
 			},
 			setMode(context, mode){
 				context.commit('setMode', mode);
@@ -215,6 +222,9 @@ export default function createAppStore() {
 			},
 			toggleInfoFilterField(context, fieldName){
 				context.commit('toggleInfoFilterField', fieldName);
+			},
+			setFieldOrder(context, fieldOrder){
+				context.commit('setFieldOrder', fieldOrder);
 			},
 		},
 		getters: {
@@ -348,6 +358,19 @@ export default function createAppStore() {
 					};
 				};
 			},
+			groupFields(state, getters){
+				return () => {
+					const exludeProps = ['svg', 'selected', 'isApartment'];
+					let fields = _.difference(_.keys(getters['defaultGroup']()), exludeProps);
+					fields.push('floor');
+					fields.push('floorIndex');
+
+					return fields;
+				};
+			},
+			sortedGroupFields(state, getters){
+				return _.sortBy(getters['groupFields'](), key => _.indexOf(state.info.fieldOrder, key));
+			},
 			properties(state, getters){
 				let properties = [];
 				let propIndex = 0;
@@ -382,13 +405,16 @@ export default function createAppStore() {
 				return state.clipboard;
 			},
 			infoTableColumns(state){
-				return state.info.tableColumns;
+				return _.sortBy(state.info.tableColumns, key => _.indexOf(state.info.fieldOrder, key));
 			},
 			infoDetailsFields(state){
-				return state.info.detailsFields;
+				return _.sortBy(state.info.detailsFields, key => _.indexOf(state.info.fieldOrder, key));
 			},
 			infoFilterFields(state){
-				return state.info.filterFields;
+				return _.sortBy(state.info.filterFields, key => _.indexOf(state.info.fieldOrder, key));
+			},
+			fieldOrder(state){
+				return state.info.fieldOrder;
 			},
 		}
 	});

@@ -27,13 +27,14 @@
 								:href="scope.row[groupField]"
 								target="_blank"
 								rel="noopener noreferrer"
-							>{{$i18n('Online Registration')}}</el-button>
+							><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$i18n('Online Registration')}}</el-button>
 						</span>
 						<span v-else-if="groupField === 'factsheet'">
 							<el-button 
 								plain
 								tag="a"
 								:href="scope.row[groupField].url"
+								v-if="scope.row[groupField] && scope.row[groupField].url"
 								target="_blank"
 							><el-icon style="margin-right: 5px;"><Document /></el-icon> {{$i18n('Fact sheet')}}</el-button>
 						</span>
@@ -47,13 +48,66 @@
 		</el-table>
 
 		<el-dialog
-			v-for="(property, index) in properties"
-			:key="index"
+			v-for="(property, pindex) in properties"
+			:key="pindex"
 			:model-value="openedDialog === property.propIndex"
 			:title="property.name"
-			width="30%"
 		>
-			<span>This is a message: {{property.name}}</span>
+			<el-scrollbar height="calc(100vh - 370px)">
+				<el-table 
+					:data="detailsTableData(property)"
+					style="min-width: 100%;"
+					table-layout="auto"
+					:show-header="false"
+				>
+					<el-table-column prop="key" :fit="true">
+						<template #default="scope">
+							<div class="pmbn-table-cell">
+								{{($store.getters['groupFieldNames']($i18n)[scope.row.key])? $store.getters['groupFieldNames']($i18n)[scope.row.key] : scope.row.key}}
+							</div>
+						</template>
+					</el-table-column>
+					<el-table-column prop="value" :fit="true">
+						<template #default="scope">
+							<div class="pmbn-table-cell">
+								<span v-if="['living_area','garden','terrace','balcony'].includes(scope.row.key)">{{ scope.row.value }} m<sup>2</sup></span>
+								<span v-else-if="['sale_price','rent_price','rent_overheads'].includes(scope.row.key)">{{formatPrice(scope.row.value)}}</span>
+								<span v-else-if="scope.row.key === 'available_from'">{{formatDate(scope.row.value)}}</span>
+								<span v-else>{{ scope.row.value }}</span>
+							</div>
+						</template>
+					</el-table-column>
+				</el-table>
+				<div class="pmbn-popup-details-buttons">
+					<el-button 
+						plain
+						tag="a"
+						:href="property.registration_url"
+						target="_blank"
+						rel="noopener noreferrer"
+						v-if="$store.getters['infoDetailsFields'].includes('registration_url')"
+					><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$i18n('Online Registration')}}</el-button>
+					<el-button 
+						plain
+						tag="a"
+						:href="property.factsheet.url"
+						target="_blank"
+						v-if="$store.getters['infoDetailsFields'].includes('factsheet') && property.factsheet && property.factsheet.url"
+					><el-icon style="margin-right: 5px;"><Document /></el-icon> {{$i18n('Fact sheet')}}</el-button>
+				</div>
+				<div class="pmbn-popup-details-image-slider" v-if="$store.getters['infoDetailsFields'].includes('images') && property.images && property.images.length > 0">
+					<swiper
+						:modules="swiperModules"
+						navigation
+						:pagination="{ clickable: true, dynamicBullets: true, }"
+						:autoHeight="true"
+					>
+						<swiper-slide v-for="(image, imgindex) in property.images" :key="imgindex" class="pmbn-image-slide">
+							<img :src="((image.sizes.large && image.sizes.large.url)? image.sizes.large.url : image.url)" :alt="((image.alt)? image.alt : '')" />
+						</swiper-slide>
+					</swiper>
+				</div>
+			</el-scrollbar>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="openedDialog = null">Close</el-button>
@@ -62,23 +116,30 @@
 		</el-dialog>
 	</div>
 </template>
-
 <script>
-import {Search, Document} from '@element-plus/icons-vue';
+import {Search, Document, EditPen} from '@element-plus/icons-vue';
 import moment from 'moment';
+import _ from 'lodash';
+import { Navigation, Pagination } from 'swiper';
+import { Swiper, SwiperSlide  } from 'swiper/vue/swiper-vue.js';
+import 'swiper/swiper.min.css';
+import 'swiper/modules/navigation/navigation.min.css';
+import 'swiper/modules/pagination/pagination.min.css';
 
 export default {
 	name: 'Info',
-	components: {Search, Document},
+	components: {Swiper, SwiperSlide, Search, Document, EditPen},
 	data: function(){
 		return {
 			openedDialog: null,
+			swiperModules: [Navigation, Pagination],
 		};
 	},
 	computed: {
 		properties(){
 			return this.$store.getters['properties'];
 		},
+		
 	},
 	methods: {
 		openPopup(row, column, event){
@@ -104,6 +165,20 @@ export default {
 		},
 		formatDate(date){
 			return moment(date).format('LL');
+		},
+		detailsTableData(property){
+			const exludeProps = ['svg', 'selected', 'isApartment','factsheet', 'registration_url', 'images'];
+			let infoDetailsFields = this.$store.getters['infoDetailsFields'];
+			return _(property)
+				.map((value, key) => ({ key, value }))
+				.filter(({ key }) => !exludeProps.includes(key) && infoDetailsFields.includes(key)) 
+				.sortBy(({ key }) => _.indexOf(this.$store.getters['fieldOrder'], key))
+				.value();
+		},
+		reInitImagesSlick() {
+			this.$nextTick(() => {
+				this.$refs.imagesSlick.reSlick();
+			});
 		},
 	},
 	mounted(){
@@ -147,6 +222,14 @@ export default {
 		height: 30px;
 		background-size: cover;
 		background-position: 50% 50%;
+	}
+	.pmbn-popup-details-buttons {
+		padding: 25px 0px;
+	}
+	.pmbn-image-slide img {
+		max-width: 100%;
+		width: auto;
+		height: auto;
 	}
 </style>
 <style>

@@ -84,6 +84,7 @@ export default {
 	}
 	.pmbn-app-info-container {
 		width: 600px;
+		max-width: 100%;
 	}
 	.pmbn-app-info-container.-full {
 		width: 100%;
@@ -121,5 +122,14 @@ export default {
 	}
 	a.el-button.is-plain {
 		--el-button-hover-text-color: var(--el-color-primary);
-	} 
+	}
+
+	@media only screen and (max-width: 1024px) {
+		.pmbn-app-container {
+			flex-wrap: wrap;
+		}
+		.pmbn-app-info-container {
+			width: 100%;
+		}
+	}
 </style>

@@ -14,6 +14,7 @@
     "js-event-bus": "^1.1.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
+    "swiper": "^9.2.4",
     "uuid": "^9.0.0",
     "vue": "^3.0.0",
     "vuedraggable": "^4.1.0",
