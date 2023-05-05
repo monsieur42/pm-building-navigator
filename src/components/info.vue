@@ -5,6 +5,8 @@
 			style="min-width: 100%;"
 			table-layout="auto"
 			@row-click="openPopup"
+			@cell-mouse-enter="highlightApartment"
+			:row-class-name="getRowClasses"
 		>
 			<el-table-column 
 				:prop="groupField" 
@@ -148,6 +150,10 @@ export default {
 			}
 			this.openedDialog = row.propIndex;
 		},
+		highlightApartment(row){
+			this.$store.dispatch('setActiveFloor', row.floorIndex);
+			this.$store.dispatch('selectGroup', {floor: row.floorIndex, group: row.groupIndex});
+		},
 		cellClasses(row, groupField, findex){
 			var classes = [];
 			if(findex === 0){
@@ -179,6 +185,19 @@ export default {
 			this.$nextTick(() => {
 				this.$refs.imagesSlick.reSlick();
 			});
+		},
+		getRowClasses(payload){
+			let classes = [];
+
+			if(
+				this.$store.state.editor.selectedGroup && 
+				this.$store.state.editor.selectedGroup.floor === payload.row.floorIndex && 
+				this.$store.state.editor.selectedGroup.group === payload.row.groupIndex
+			){
+				classes.push('-highlight');
+			}
+
+			return classes;
 		},
 	},
 	mounted(){
@@ -238,5 +257,8 @@ export default {
 	}
 	.pmbn-info-container .el-table__row {
 		cursor: pointer;
+	}
+	.pmbn-info-container .el-table--enable-row-hover .el-table__body tr.-highlight>td.el-table__cell {
+		background-color: var(--el-table-row-hover-bg-color);
 	}
 </style>

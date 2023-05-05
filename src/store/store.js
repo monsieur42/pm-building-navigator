@@ -375,13 +375,14 @@ export default function createAppStore() {
 				let properties = [];
 				let propIndex = 0;
 				_.forEach(getters['floors'], (floor, fi) => {
-					_.forEach(floor.groups, (group) => {
+					_.forEach(floor.groups, (group, gi) => {
 						if(group.isApartment){
 							properties.push({
 								...group,
 								floor: floor.name,
 								floorIndex: fi,
 								propIndex: propIndex,
+								groupIndex: gi,
 							});
 							propIndex++;
 						}

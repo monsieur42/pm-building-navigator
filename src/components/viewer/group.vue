@@ -1,5 +1,5 @@
 <template>
-	<g class="pmbn-group" :class="{'-selected': isSelected}" v-html="group.svg" @click="selectGroup"></g>
+	<g class="pmbn-group" :class="{'-selected': isSelected, '-highlighted': isHighlighted, '-hoverable': isHoverable}" v-html="group.svg" @click="selectGroup" @mouseenter="highlightGroup"></g>
 </template>
 
 <script>
@@ -18,16 +18,35 @@ export default {
 			return this.$store.getters['floor'](this.floor);
 		},
 		isSelected(){
-			return this.$store.state.editor.selectedGroup && 
+			return this.$store.state.mode === 'editor' &&
+				this.$store.state.editor.selectedGroup && 
 				this.$store.state.editor.selectedGroup.floor === this.floor && 
 				this.$store.state.editor.selectedGroup.group === this.index;
+		},
+		isHighlighted(){
+			return this.$store.state.mode !== 'editor' &&
+				this.$store.state.editor.selectedGroup && 
+				this.$store.state.editor.selectedGroup.floor === this.floor && 
+				this.$store.state.editor.selectedGroup.group === this.index;
+		},
+		isHoverable(){
+			if(this.$store.state.mode === 'editor'){
+				return true;
+			}
+			
+			return this.group.isApartment;
 		},
 	},
 	methods: {
 		selectGroup(){
-			if(!this.floorObj.passive){
+			if(!this.floorObj.passive && this.$store.state.mode === 'editor'){
 				this.$store.dispatch('selectGroup', {floor: this.floor, group: this.index});
 				this.$store.dispatch('setActiveTab', 'apartment');
+			}
+		},
+		highlightGroup(){
+			if(!this.floorObj.passive && this.$store.state.mode !== 'editor' && this.group.isApartment){
+				this.$store.dispatch('selectGroup', {floor: this.floor, group: this.index});
 			}
 		},
 	}
@@ -43,7 +62,8 @@ export default {
 		transition: all 300ms ease-out;
 		cursor: pointer;
 	}
-	.pmbn-floor:not(.-passive) .pmbn-group:hover {
+	.pmbn-floor:not(.-passive) .pmbn-group.-hoverable.-highlighted,
+	.pmbn-floor:not(.-passive) .pmbn-group.-hoverable:hover {
 		filter: brightness(0.85);
 	}
 	.pmbn-group.-selected,
