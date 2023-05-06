@@ -1,8 +1,16 @@
 <template>
-	<div class="pmbn-app-container">
-		<viewer v-if="$store.getters['svgLoaded']" />
-		<div class="pmbn-app-info-container" :class="{'-full': !$store.getters['svgLoaded'] }">
-			<el-form-item :label="$i18n('Preview')" v-if="$store.getters['mode'] !== 'view'">
+	<div class="pmbn-app-container" ref="appContainer">
+		<viewer v-if="$store.getters['svgLoaded']" :viewportDimensions="viewportDimensions"/>
+		<div 
+			class="pmbn-app-info-container"
+			:class="{'-full': !$store.getters['svgLoaded'],'-responsive': infoWidth <= 800 }"
+			:style="{
+				width: infoWidth+'px',
+				'min-width': infoWidth+'px',
+				'max-width': infoWidth+'px',
+			}"
+		>
+			<el-form-item :label="$i18n('Preview')" v-if="$store.getters['mode'] !== 'view'" class="pmbn-preview-toggle">
 				<el-switch
 					v-model="preview"
 					class="ml-2"
@@ -22,7 +30,10 @@ import viewer from './components/viewer.vue'
 import editor from './components/editor.vue'
 import info from './components/info.vue'
 
+import computedDimensions from "vue-computed-dimensions";
+
 export default {
+	mixins: [computedDimensions('appContainer')],
 	name: 'App',
 	components: {
 		viewer,
@@ -36,6 +47,7 @@ export default {
 		return {
 			saveTO: null,
 			preview: false,
+			breakView: false,
 		};
 	},
 	methods: {
@@ -45,6 +57,36 @@ export default {
 				let promises = [];
 				this.$eventBus.emit('save', null, this.$store.getters['config'], promises);
 			}, 1000);
+		},
+		setBreakView(val){
+			this.breakView = val;
+		},
+	},
+	computed: {
+		appContainerDimensions(){
+			return [this.appContainerWidth, this.appContainerHeight, this.appContainerX, this.appContainerY];
+		},
+		viewportDimensions(){
+			let maxWidth = this.appContainerDimensions[0] * 0.4;
+			let maxHeight = window.innerHeight * 0.9;
+
+			if(maxWidth < 450){
+				maxWidth = this.appContainerDimensions[0];
+				this.setBreakView(true);
+			}
+			else {
+				this.setBreakView(false);
+			}
+
+			let viewbox = [...this.$store.getters['viewbox']];
+			viewbox[3] = parseInt(viewbox[3] )+ this.$store.getters['levelSpacing'] + this.$store.getters['spaceAbove'];
+
+			const scale = Math.min(maxWidth / parseInt(viewbox[2]), maxHeight / parseInt(viewbox[3]));
+
+			return [Math.round(parseInt(viewbox[2]) * scale), Math.round(parseInt(viewbox[3]) * scale)];
+		},
+		infoWidth(){
+			return (this.breakView)? this.appContainerDimensions[0] : this.appContainerDimensions[0] - this.viewportDimensions[0];
 		},
 	},
 	watch: {
@@ -71,6 +113,16 @@ export default {
 				this.$store.dispatch('setMode', ((this.preview)? 'preview' : 'editor'));
 			},
 		},
+		'$store.state.building.mainColor': {
+			handler(newVal){
+				document.documentElement.style.setProperty('--pmbn-color-primary', newVal);
+				document.documentElement.style.setProperty('--el-color-primary', newVal);
+				document.documentElement.style.setProperty('--swiper-navigation-color', newVal);
+				document.documentElement.style.setProperty('--swiper-pagination-color', newVal);
+				document.documentElement.style.setProperty('--swiper-theme-color', newVal);
+			},
+			deep: false,
+		},
 	},
 }
 </script>
@@ -78,13 +130,11 @@ export default {
 <style>
 	.pmbn-app-container {
 		width: 100%;
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-	}
-	.pmbn-app-info-container {
-		width: 600px;
 		max-width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+		flex-wrap: wrap;
 	}
 	.pmbn-app-info-container.-full {
 		width: 100%;
@@ -99,7 +149,7 @@ export default {
 	.pmbn-price .el-input-number:not(:last-child) {
 		margin-bottom: 5px;
 	}
-	.el-form-item__label {
+	.el-form-item__label:not(.pmbn-preview-toggle .el-form-item__label) {
 		width: 150px;
 	}
 
@@ -124,12 +174,4 @@ export default {
 		--el-button-hover-text-color: var(--el-color-primary);
 	}
 
-	@media only screen and (max-width: 1024px) {
-		.pmbn-app-container {
-			flex-wrap: wrap;
-		}
-		.pmbn-app-info-container {
-			width: 100%;
-		}
-	}
 </style>

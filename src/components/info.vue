@@ -136,6 +136,7 @@
 			</div>
 		</div>
 		<el-table 
+			ref="infotable"
 			:data="properties"
 			style="min-width: 100%;"
 			table-layout="auto"
@@ -145,7 +146,7 @@
 		>
 			<el-table-column 
 				:prop="groupField" 
-				:label="($store.getters['groupFieldNames']($i18n)[groupField])? $store.getters['groupFieldNames']($i18n)[groupField] : groupField"
+				:label="getColumnNames(groupField)"
 				v-for="(groupField, findex) in $store.getters['infoTableColumns']" 
 				:key="findex"
 				:fit="true"
@@ -153,6 +154,7 @@
 			>
 				<template #default="scope">
 					<div class="pmbn-table-cell" :class="cellClasses(scope.row, groupField, findex)">
+						<span class="pmbn-resp-cell-label" v-if="findex > 0">{{getColumnNames(groupField)}}: </span>
 						<el-icon v-if="findex === 0"><Search /></el-icon>
 						<span v-if="['living_area','garden','terrace','balcony'].includes(groupField)">{{ scope.row[groupField] }} m<sup>2</sup></span>
 						<span v-else-if="['sale_price','rent_price','rent_overheads'].includes(groupField)">{{formatPrice(scope.row[groupField])}}</span>
@@ -181,6 +183,7 @@
 							<div class="pmbn-table-thumbnail" :style="{'background-image': 'url(\''+((image.sizes.thumbnail && image.sizes.thumbnail.url)? image.sizes.thumbnail.url : image.url)+'\')'}" v-for="(image, imgindex) in scope.row[groupField]" :key="imgindex"></div>
 						</span>
 						<span v-else>{{ scope.row[groupField] }}</span>
+						<span class="pmbn-resp-cell-coma" v-if="findex > 0 && findex < $store.getters['infoTableColumns'].length - 1">,</span>
 					</div>
 				</template>
 			</el-table-column>
@@ -191,6 +194,7 @@
 			:key="pindex"
 			:model-value="openedDialog === property.propIndex"
 			:title="property.name"
+			@closed="() => {openedDialog = null}"
 		>
 			<el-scrollbar height="calc(100vh - 370px)">
 				<el-table 
@@ -225,7 +229,7 @@
 						:href="property.registration_url"
 						target="_blank"
 						rel="noopener noreferrer"
-						:disabled="scope.row.status !== 'available'"
+						:disabled="property.status !== 'available'"
 						v-if="$store.getters['infoDetailsFields'].includes('registration_url')"
 					><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$i18n('Online Registration')}}</el-button>
 					<el-button 
@@ -288,6 +292,7 @@ export default {
 				status: null,
 				floor: null,
 			},
+			isTableScrolling: false,
 		};
 	},
 	computed: {
@@ -415,7 +420,7 @@ export default {
 				}
 			});
 			return options;
-		}
+		},
 	},
 	methods: {
 		openPopup(row, column, event){
@@ -483,10 +488,31 @@ export default {
 			const base = Math.pow(10, numDigits - 1);
 			return base / 100;
 		},
+		getColumnNames(fieldName){
+			let columnName = (this.$store.getters['groupFieldNames'](this.$i18n)[fieldName])? this.$store.getters['groupFieldNames'](this.$i18n)[fieldName] : fieldName;
+			if(fieldName === 'rooms'){
+				columnName = this.$i18n('Rooms');
+			}
+			return columnName;
+		},
+		checkTableOverflow() {
+			const tableScrollbarWrapper = this.$refs.infotable.$el.querySelector('.el-scrollbar__wrap');
+			if (tableScrollbarWrapper.scrollWidth > tableScrollbarWrapper.clientWidth) {
+				this.isTableScrolling = true;
+			}
+			else {
+				this.isTableScrolling = false;
+			}
+		}
 	},
 	mounted(){
 		moment.locale(this.$i18nData.langCode);
-	}
+
+		this.$nextTick(() => {
+			setTimeout(() => {this.checkTableOverflow();}, 0)
+		});
+		window.addEventListener('resize', this.checkTableOverflow);
+	},
 }
 </script>
 
@@ -555,6 +581,9 @@ export default {
 		font-size: 14px;
 		font-weight: bold;
 	}
+	.pmbn-info-filters {
+		margin-bottom: 25px;
+	}
 </style>
 <style>
 	.pmbn-info-container .el-table .cell {
@@ -569,5 +598,62 @@ export default {
 	.pmbn-info-container .el-date-editor,
 	.pmbn-info-container .el-select {
 		width: 100%;
+	}
+
+	.pmbn-resp-cell-label {
+		display: none;
+	}
+	.pmbn-app-info-container.-responsive .pmbn-resp-cell-label{
+		display: inline-block;
+		margin-right: 5px;
+	}
+	.pmbn-app-info-container.-responsive table {
+		display: block;
+		width: 100% !important;
+		max-width: 100%;
+	}
+	.pmbn-app-info-container.-responsive thead {
+		display: none;
+	}
+	.pmbn-app-info-container.-responsive tbody {
+		display: block;
+		width: 100%;
+		max-width: 100%;
+	}
+	.pmbn-app-info-container.-responsive tr.el-table__row {
+		width: 100%;
+		max-width: 100%;
+		display: flex;
+		justify-content: flex-start;
+		align-items: flex-end;
+		flex-wrap: wrap;
+		border-bottom: var(--el-table-border);
+		padding: 8px 0;
+	}
+	.pmbn-app-info-container.-responsive td.el-table__cell {
+		display: block;
+		border-bottom: none;
+		padding: 3px 0;
+	}
+	.pmbn-app-info-container.-responsive td.el-table_1_column_1 {
+		width: 100%;
+		font-size: 18px;
+		font-weight: bold;
+	}
+	.pmbn-app-info-container.-responsive td.el-table__cell > div.cell{
+		line-height: 1.2;
+		padding: 0 3px;
+	}
+	.pmbn-app-info-container.-responsive .pmbn-table-cell {
+		align-items: flex-end;
+	}
+	.pmbn-app-info-container.-responsive .el-table--enable-row-hover .el-table__body tr:hover,
+	.pmbn-app-info-container.-responsive .el-table--enable-row-hover .el-table__body tr.-highlight {
+		background-color: var(--el-table-row-hover-bg-color);
+		transition: background-color .25s ease;
+	}
+	.pmbn-app-info-container.-responsive .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell,
+	.pmbn-app-info-container.-responsive .el-table--enable-row-hover .el-table__body tr.-highlight>td.el-table__cell {
+		background-color: transparent;
 	}
 </style>

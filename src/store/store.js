@@ -15,6 +15,7 @@ export default function createAppStore() {
 				levelSpacing: 38,
 				spaceAbove: 0,
 				viewbox: [0,0,100,100],
+				mainColor: '#409eff',
 			},
 			editor: {
 				activeTab: 'general',
@@ -399,7 +400,7 @@ export default function createAppStore() {
 						sold: $i18n('Sold'),
 						rented: $i18n('Rented'),
 					};
-					
+
 					return (usedOnly)? _.pickBy(statuses, (l, v) => used.includes(v)) : statuses;
 				};
 				//return _.compact(_.uniq(_.map(getters['properties'], _.property('status'))));

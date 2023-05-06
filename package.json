@@ -17,6 +17,7 @@
     "swiper": "^9.2.4",
     "uuid": "^9.0.0",
     "vue": "^3.0.0",
+    "vue-computed-dimensions": "^0.1.0",
     "vuedraggable": "^4.1.0",
     "vuex": "^4.1.0"
   },

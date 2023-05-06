@@ -8,6 +8,9 @@
 				<el-form-item :label="$i18n('Space above')">
 					<el-input-number v-model="$store.state.building.spaceAbove" :step="1" />
 				</el-form-item>
+				<el-form-item :label="$i18n('Main color')">
+					<el-color-picker v-model="$store.state.building.mainColor" />
+				</el-form-item>
 				<el-form-item :label="$i18n('Change SVG')">
 					<el-upload
 						ref="changeSVG"

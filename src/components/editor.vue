@@ -41,6 +41,7 @@ export default {
 <style scoped>
 	.pmbn-editor-container {
 		width: 100%;
+		max-width: 600px;
 		background-color: #fff;
 		padding: 20px;
 		border: 1px solid #c3c4c7;

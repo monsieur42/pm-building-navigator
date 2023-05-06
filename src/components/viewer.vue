@@ -1,5 +1,15 @@
 <template>
-	<div class="pmbn-viewer-container">
+	<div 
+		class="pmbn-viewer-container" 
+		:style="{
+			width: viewportDimensions[0]+'px',
+			height: viewportDimensions[1]+'px',
+			'max-width': viewportDimensions[0]+'px',
+			'max-height': viewportDimensions[1]+'px',
+			'min-width': viewportDimensions[0]+'px',
+			'min-height': viewportDimensions[1]+'px',
+		}"
+	>
 		<svg 
 			:viewBox="viewbox" 
 			width="100%" 
@@ -24,6 +34,7 @@ import floor from './viewer/floor.vue';
 export default {
 	name: 'Viewer',
 	components: {floor},
+	props: ['viewportDimensions'],
 	computed: {
 		viewbox(){
 			let viewbox = [...this.$store.getters['viewbox']];
@@ -38,6 +49,7 @@ export default {
 				'--pmbn-level-spacing': (this.$store.getters['levelSpacing'] + this.$store.getters['spaceAbove'])+'px',
 			};
 		},
+		
 	},
 	mounted(){
 
@@ -46,19 +58,16 @@ export default {
 </script>
 
 <style scoped>
-	.pmbn-viewer-container {
-		flex: 2;
-	}
 	.pmbn-viewer-container svg {
 		width: 100%;
 		height: auto;
 		-webkit-tap-highlight-color: transparent;
-	    -webkit-touch-callout: none;
-	    -webkit-user-select: none;
-	    -khtml-user-select: none;
-	    -moz-user-select: none;
-	    -ms-user-select: none;
-	    user-select: none;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
 	}
 	.pmbn-viewer-container svg:focus {
 		outline: none !important;
