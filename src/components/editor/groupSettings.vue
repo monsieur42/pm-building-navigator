@@ -58,10 +58,10 @@
 				:reserve-keyword="false"
 			>
 				<el-option
-					v-for="(item, oi) in $store.getters['groupStatuses']"
-					:key="oi"
-					:label="item"
-					:value="item"
+					v-for="(status, statusKey) in $store.getters['groupStatuses']($i18n)"
+					:key="statusKey"
+					:label="status"
+					:value="statusKey"
 				/>
 			</el-select>
 		</el-form-item>

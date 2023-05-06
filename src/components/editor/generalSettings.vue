@@ -70,7 +70,7 @@
 									<el-icon><Tickets /></el-icon>
 								</el-button>
 							</el-tooltip>
-							<el-tooltip effect="dark" :content="$i18n('Display as filter option')" placement="top" :hide-after="0">
+							<el-tooltip effect="dark" :content="$i18n('Display as filter option')" placement="top" :hide-after="0" v-if="!['registration_url', 'factsheet', 'images'].includes(element.field)">
 								<el-button 
 									:type="($store.getters['infoFilterFields'].includes(element.field))? 'success' : 'default' " 
 									circle 

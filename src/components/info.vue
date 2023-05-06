@@ -1,5 +1,140 @@
 <template>
 	<div class="pmbn-info-container">
+		<div class="pmbn-info-filters">
+			<div class="pmbn-info-filter-wrapper" v-if="$store.getters['infoFilterFields'].includes('name') || $store.getters['infoFilterFields'].includes('floor')">
+				<el-input
+					v-model="filters.search"
+					:placeholder="$i18n('Search')"
+					:prefix-icon="SearchIcon"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('rooms')" style="padding: 0px 10px;">
+				<label>{{$i18n('Number of rooms')}}</label>
+				<el-slider
+					v-model="filters.rooms"
+					range
+					:step="0.5"
+					:min="this.$store.getters['groupFieldMinMax']('rooms')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('rooms')[1]"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('living_area')" style="padding: 0px 10px;">
+				<label>{{$i18n('Living area')}}</label>
+				<el-slider
+					v-model="filters.living_area"
+					range
+					:min="this.$store.getters['groupFieldMinMax']('living_area')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('living_area')[1]"
+					:format-tooltip="(v) => v+'m²'"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('garden')" style="padding: 0px 10px;">
+				<label>{{$i18n('Garden')}}</label>
+				<el-slider
+					v-model="filters.garden"
+					range
+					:min="this.$store.getters['groupFieldMinMax']('garden')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('garden')[1]"
+					:format-tooltip="(v) => v+'m²'"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('terrace')" style="padding: 0px 10px;">
+				<label>{{$i18n('Terrace')}}</label>
+				<el-slider
+					v-model="filters.terrace"
+					range
+					:min="this.$store.getters['groupFieldMinMax']('terrace')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('terrace')[1]"
+					:format-tooltip="(v) => v+'m²'"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('balcony')" style="padding: 0px 10px;">
+				<label>{{$i18n('Balcony')}}</label>
+				<el-slider
+					v-model="filters.balcony"
+					range
+					:min="this.$store.getters['groupFieldMinMax']('balcony')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('balcony')[1]"
+					:format-tooltip="(v) => v+'m²'"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('sale_price')" style="padding: 0px 10px;">
+				<label>{{$i18n('Sale price')}}</label>
+				<el-slider
+					v-model="filters.sale_price"
+					range
+					:step="calcSteps(this.$store.getters['groupFieldMinMax']('sale_price'))"
+					:min="this.$store.getters['groupFieldMinMax']('sale_price')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('sale_price')[1]"
+					:format-tooltip="formatPrice"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('rent_price')" style="padding: 0px 10px;">
+				<label>{{$i18n('Rent price')}}</label>
+				<el-slider
+					v-model="filters.rent_price"
+					range
+					:step="calcSteps(this.$store.getters['groupFieldMinMax']('rent_price'))"
+					:min="this.$store.getters['groupFieldMinMax']('rent_price')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('rent_price')[1]"
+					:format-tooltip="formatPrice"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('rent_overheads')" style="padding: 0px 10px;">
+				<label>{{$i18n('Overheads')}}</label>
+				<el-slider
+					v-model="filters.rent_overheads"
+					range
+					:step="calcSteps(this.$store.getters['groupFieldMinMax']('rent_overheads'))"
+					:min="this.$store.getters['groupFieldMinMax']('rent_overheads')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('rent_overheads')[1]"
+					:format-tooltip="formatPrice"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper" v-if="$store.getters['infoFilterFields'].includes('available_from')">
+				<label>{{$i18n('Availability')}}</label>
+				<el-date-picker
+					v-model="filters.available_from"
+					type="daterange"
+					:range-separator="$i18n('to', 'date range')"
+					:start-placeholder="$i18n('Start date')"
+					:end-placeholder="$i18n('End date')"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('status')">
+				<label>{{$i18n('Status')}}</label>
+				<el-select
+					v-model="filters.status"
+					filterable
+					clearable
+					:reserve-keyword="false"
+				>
+					<el-option
+						v-for="(status, statusKey) in $store.getters['groupStatuses']($i18n, true)"
+						:key="statusKey"
+						:label="status"
+						:value="statusKey"
+					/>
+				</el-select>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('floorIndex')">
+				<label>{{$i18n('Floor')}}</label>
+				<el-select
+					v-model="filters.floor"
+					filterable
+					clearable
+					multiple
+					:reserve-keyword="false"
+				>
+					<el-option
+						v-for="floorOption in floorOptions"
+						:key="floorOption.value"
+						:label="floorOption.label"
+						:value="floorOption.value"
+					/>
+				</el-select>
+			</div>
+		</div>
 		<el-table 
 			:data="properties"
 			style="min-width: 100%;"
@@ -22,6 +157,7 @@
 						<span v-if="['living_area','garden','terrace','balcony'].includes(groupField)">{{ scope.row[groupField] }} m<sup>2</sup></span>
 						<span v-else-if="['sale_price','rent_price','rent_overheads'].includes(groupField)">{{formatPrice(scope.row[groupField])}}</span>
 						<span v-else-if="groupField === 'available_from'">{{formatDate(scope.row[groupField])}}</span>
+						<span v-else-if="groupField === 'status'">{{(($store.getters['groupStatuses']($i18n)[scope.row[groupField]])? $store.getters['groupStatuses']($i18n)[scope.row[groupField]] : '-')}}</span>
 						<span v-else-if="groupField === 'registration_url'">
 							<el-button 
 								plain
@@ -29,6 +165,7 @@
 								:href="scope.row[groupField]"
 								target="_blank"
 								rel="noopener noreferrer"
+								:disabled="scope.row.status !== 'available'"
 							><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$i18n('Online Registration')}}</el-button>
 						</span>
 						<span v-else-if="groupField === 'factsheet'">
@@ -75,6 +212,7 @@
 								<span v-if="['living_area','garden','terrace','balcony'].includes(scope.row.key)">{{ scope.row.value }} m<sup>2</sup></span>
 								<span v-else-if="['sale_price','rent_price','rent_overheads'].includes(scope.row.key)">{{formatPrice(scope.row.value)}}</span>
 								<span v-else-if="scope.row.key === 'available_from'">{{formatDate(scope.row.value)}}</span>
+								<span v-else-if="scope.row.key === 'status'">{{(($store.getters['groupStatuses']($i18n)[scope.row.value])? $store.getters['groupStatuses']($i18n)[scope.row.value] : '-')}}</span>
 								<span v-else>{{ scope.row.value }}</span>
 							</div>
 						</template>
@@ -87,6 +225,7 @@
 						:href="property.registration_url"
 						target="_blank"
 						rel="noopener noreferrer"
+						:disabled="scope.row.status !== 'available'"
 						v-if="$store.getters['infoDetailsFields'].includes('registration_url')"
 					><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$i18n('Online Registration')}}</el-button>
 					<el-button 
@@ -135,17 +274,152 @@ export default {
 		return {
 			openedDialog: null,
 			swiperModules: [Navigation, Pagination],
+			filters: {
+				search: '',
+				rooms: this.$store.getters['groupFieldMinMax']('rooms'),
+				living_area: this.$store.getters['groupFieldMinMax']('living_area'),
+				garden: this.$store.getters['groupFieldMinMax']('garden'),
+				terrace: this.$store.getters['groupFieldMinMax']('terrace'),
+				balcony: this.$store.getters['groupFieldMinMax']('balcony'),
+				sale_price: this.$store.getters['groupFieldMinMax']('sale_price'),
+				rent_price: this.$store.getters['groupFieldMinMax']('rent_price'),
+				rent_overheads: this.$store.getters['groupFieldMinMax']('rent_overheads'),
+				available_from: null,
+				status: null,
+				floor: null,
+			},
 		};
 	},
 	computed: {
 		properties(){
-			return this.$store.getters['properties'];
+			return _.filter(this.$store.getters['properties'], (property) => {
+
+				//SEARCH
+				if(this.filters.search.length > 0 && (this.$store.getters['infoFilterFields'].includes('name') || this.$store.getters['infoFilterFields'].includes('floor'))){
+					let searchTerm = _.trim(_.lowerCase(this.filters.search));
+					let groupName = _.trim(_.lowerCase(property.name));
+					let floorName = _.trim(_.lowerCase(property.floor));
+					let searchHit = false;
+
+					if(this.$store.getters['infoFilterFields'].includes('name') && _.includes(groupName, searchTerm)){
+						searchHit = true;
+					}
+
+					if(!searchHit && this.$store.getters['infoFilterFields'].includes('floor') && _.includes(floorName, searchTerm)){
+						searchHit = true;
+					}
+
+					if(!searchHit){
+						return false;
+					}
+				}
+
+				//ROOMS
+				if(this.$store.getters['infoFilterFields'].includes('rooms')){
+					if(property.rooms < this.filters.rooms[0] || property.rooms > this.filters.rooms[1]){
+						return false;
+					}
+				}
+
+				//LIVING AREA
+				if(this.$store.getters['infoFilterFields'].includes('living_area')){
+					if(property.living_area < this.filters.living_area[0] || property.living_area > this.filters.living_area[1]){
+						return false;
+					}
+				}
+
+				//GARDEN
+				if(this.$store.getters['infoFilterFields'].includes('garden')){
+					if(property.garden < this.filters.garden[0] || property.garden > this.filters.garden[1]){
+						return false;
+					}
+				}
+
+				//TERRACE
+				if(this.$store.getters['infoFilterFields'].includes('terrace')){
+					if(property.terrace < this.filters.terrace[0] || property.terrace > this.filters.terrace[1]){
+						return false;
+					}
+				}
+
+				//BALCONY
+				if(this.$store.getters['infoFilterFields'].includes('balcony')){
+					if(property.balcony < this.filters.balcony[0] || property.balcony > this.filters.balcony[1]){
+						return false;
+					}
+				}
+
+				//SALE PRICE
+				if(this.$store.getters['infoFilterFields'].includes('sale_price')){
+					if(property.sale_price < this.filters.sale_price[0] || property.sale_price > this.filters.sale_price[1]){
+						return false;
+					}
+				}
+
+				//RENT PRICE
+				if(this.$store.getters['infoFilterFields'].includes('rent_price')){
+					if(property.rent_price < this.filters.rent_price[0] || property.rent_price > this.filters.rent_price[1]){
+						return false;
+					}
+				}
+
+				//RENT OVERHEADS
+				if(this.$store.getters['infoFilterFields'].includes('rent_overheads')){
+					if(property.rent_overheads < this.filters.rent_overheads[0] || property.rent_overheads > this.filters.rent_overheads[1]){
+						return false;
+					}
+				}	
+
+				//AVAILABLE FROM
+				if(this.$store.getters['infoFilterFields'].includes('available_from')){
+					let available_from = new Date(property.available_from);
+					if(this.filters.available_from){
+						if(available_from < this.filters.available_from[0] || available_from > this.filters.available_from[1]){
+							return false;
+						}
+					}
+				}
+
+				//STATUS
+				if(this.$store.getters['infoFilterFields'].includes('status')){
+					if(this.filters.status){
+						if(property.status !== this.filters.status){
+							return false;
+						}
+					}
+				}
+
+				//FLOOR
+				if(this.$store.getters['infoFilterFields'].includes('floorIndex')){
+					if(this.filters.floor && this.filters.floor.length > 0){
+						if(!this.filters.floor.includes(property.floorIndex)){
+							return false;
+						}
+					}
+				}
+
+				return true;
+			});
 		},
-		
+		SearchIcon(){
+			return Search;
+		},
+		floorOptions(){
+			let options = [];
+			_.forEach(this.$store.getters['floors'], (floor, fi) => {
+				if(typeof (_.find(floor.groups, (g) => g.isApartment)) !== 'undefined'){
+					options.push({
+						value: fi,
+						label: floor.name,
+					});
+				}
+			});
+			return options;
+		}
 	},
 	methods: {
 		openPopup(row, column, event){
-			if(event.target.tagName === 'A' || event.target.closest('a')){
+			if(row.status != 'available' || event.target.tagName === 'A' || event.target.closest('a')){
 				return;
 			}
 			this.openedDialog = row.propIndex;
@@ -197,7 +471,17 @@ export default {
 				classes.push('-highlight');
 			}
 
+			if(payload.row.status !== 'available'){
+				classes.push('-unavailable');
+			}
+
 			return classes;
+		},
+		calcSteps(range){
+			const dif = range[1] - range[0];
+			const numDigits = Math.floor(Math.log10(dif)) + 1;
+			const base = Math.pow(10, numDigits - 1);
+			return base / 100;
 		},
 	},
 	mounted(){
@@ -250,15 +534,40 @@ export default {
 		width: auto;
 		height: auto;
 	}
+	.pmbn-info-filters {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+		flex-wrap: wrap;
+		gap: 20px;
+	}
+	.pmbn-info-filter-wrapper {
+		width: 100%;
+		box-sizing: border-box;
+	}
+	.pmbn-info-filter-wrapper.-half {
+		width: calc(50% - 10px);
+	}
+	.pmbn-info-filter-wrapper label {
+		color: var(--el-text-color-regular);
+		font-size: 14px;
+		font-weight: bold;
+	}
 </style>
 <style>
 	.pmbn-info-container .el-table .cell {
 		white-space: nowrap;
 	}
-	.pmbn-info-container .el-table__row {
+	.pmbn-info-container .el-table__row:not(.-unavailable) {
 		cursor: pointer;
 	}
 	.pmbn-info-container .el-table--enable-row-hover .el-table__body tr.-highlight>td.el-table__cell {
 		background-color: var(--el-table-row-hover-bg-color);
+	}
+	.pmbn-info-container .el-date-editor,
+	.pmbn-info-container .el-select {
+		width: 100%;
 	}
 </style>

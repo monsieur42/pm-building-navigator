@@ -392,7 +392,17 @@ export default function createAppStore() {
 				return properties;
 			},
 			groupStatuses(state, getters){
-				return _.compact(_.uniq(_.map(getters['properties'], _.property('status'))));
+				return ($i18n, usedOnly) => {
+					let used = getters['groupFieldUsed']('status');
+					let statuses = {
+						available: $i18n('Available'),
+						sold: $i18n('Sold'),
+						rented: $i18n('Rented'),
+					};
+					
+					return (usedOnly)? _.pickBy(statuses, (l, v) => used.includes(v)) : statuses;
+				};
+				//return _.compact(_.uniq(_.map(getters['properties'], _.property('status'))));
 			},
 
 			selectedGroup(state, getters){
@@ -416,6 +426,18 @@ export default function createAppStore() {
 			},
 			fieldOrder(state){
 				return state.info.fieldOrder;
+			},
+			groupFieldMinMax(state, getters){
+				let properties = getters['properties'];
+				return (field) => {
+					return [_.minBy(properties, field)[field], _.maxBy(properties, field)[field]];
+				};
+			},
+			groupFieldUsed(state, getters){
+				let properties = getters['properties'];
+				return (field) => {
+					return _.uniq(_.map(properties, field));
+				};
 			},
 		}
 	});
