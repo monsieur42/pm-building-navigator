@@ -134,7 +134,6 @@ export default {
 		document.documentElement.style.setProperty('--swiper-pagination-color', this.$store.state.building.mainColor);
 		document.documentElement.style.setProperty('--swiper-theme-color', this.$store.state.building.mainColor);
 
-		console.log(this.$store.state.info.soldStatusRowOpacity);
 		document.documentElement.style.setProperty('--pmbn-sold-status-row-opacity', (this.$store.state.info.soldStatusRowOpacity / 100));
 	},
 }
