@@ -69,7 +69,6 @@
 			<el-select
 				v-model="group.status"
 				filterable
-				allow-create
 				default-first-option
 				:reserve-keyword="false"
 			>

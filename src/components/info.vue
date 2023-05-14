@@ -36,6 +36,7 @@
 					clearable
 					multiple
 					:reserve-keyword="false"
+					:placeholder="$i18n('Select')"
 				>
 					<el-option
 						v-for="(outdoorType, otindex) in $store.getters['groupOutdoorTypes']"
@@ -125,6 +126,7 @@
 					filterable
 					clearable
 					:reserve-keyword="false"
+					:placeholder="$i18n('Select')"
 				>
 					<el-option
 						v-for="(status, statusKey) in $store.getters['groupStatuses']($i18n, true)"
@@ -142,6 +144,7 @@
 					clearable
 					multiple
 					:reserve-keyword="false"
+					:placeholder="$i18n('Select')"
 				>
 					<el-option
 						v-for="floorOption in floorOptions"
@@ -161,6 +164,7 @@
 			@cell-mouse-enter="highlightApartment"
 			:row-class-name="getRowClasses"
 			class="pmbn-info-table"
+			:empty-text="$i18n('Apartments not found')"
 		>
 			<el-table-column 
 				:prop="groupField" 
@@ -288,7 +292,7 @@
 			</div>
 			<template #footer>
 				<span class="dialog-footer">
-					<el-button @click="openedDialog = null">Close</el-button>
+					<el-button @click="openedDialog = null">{{$i18n('Close')}}</el-button>
 				</span>
 			</template>
 		</el-dialog>
