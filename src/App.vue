@@ -10,7 +10,7 @@
 				'max-width': infoWidth+'px',
 			}"
 		>
-			<el-form-item :label="$i18n('Preview')" v-if="$store.getters['mode'] !== 'view'" class="pmbn-preview-toggle">
+			<el-form-item :label="$i18n('Preview')" v-if="$store.getters['mode'] !== 'view' && $store.getters['svgLoaded']" class="pmbn-preview-toggle">
 				<el-switch
 					v-model="preview"
 					class="ml-2"

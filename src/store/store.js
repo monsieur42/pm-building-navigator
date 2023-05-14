@@ -442,7 +442,7 @@ export default function createAppStore() {
 			groupFieldMinMax(state, getters){
 				let properties = getters['properties'];
 				return (field) => {
-					return [_.minBy(properties, field)[field], _.maxBy(properties, field)[field]];
+					return (_.minBy(properties, field) && _.maxBy(properties, field))? [_.minBy(properties, field)[field], _.maxBy(properties, field)[field]] : [0,0];
 				};
 			},
 			groupFieldUsed(state, getters){

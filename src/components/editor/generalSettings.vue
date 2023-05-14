@@ -166,7 +166,7 @@ export default {
 			reader.onload = () => {
 				const content = reader.result
 				this.$store.dispatch('loadSVG', content);
-				this.$refs.changeSVG.clearFiles();
+				this.$refs.changeSVG?.clearFiles();
 			}
 			reader.readAsText(file.raw)
 		},
