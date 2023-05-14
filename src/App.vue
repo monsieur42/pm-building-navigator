@@ -40,9 +40,6 @@ export default {
 		editor,
 		info
 	},
-	mounted(){
-
-	},
 	data(){
 		return {
 			saveTO: null,
@@ -123,6 +120,22 @@ export default {
 			},
 			deep: false,
 		},
+		'$store.state.info.soldStatusRowOpacity': {
+			handler(newVal){console.log('asdqwe');
+				document.documentElement.style.setProperty('--pmbn-sold-status-row-opacity', (newVal / 100));
+			},
+			deep: false,
+		},
+	},
+	mounted(){
+		document.documentElement.style.setProperty('--pmbn-color-primary', this.$store.state.building.mainColor);
+		document.documentElement.style.setProperty('--el-color-primary', this.$store.state.building.mainColor);
+		document.documentElement.style.setProperty('--swiper-navigation-color', this.$store.state.building.mainColor);
+		document.documentElement.style.setProperty('--swiper-pagination-color', this.$store.state.building.mainColor);
+		document.documentElement.style.setProperty('--swiper-theme-color', this.$store.state.building.mainColor);
+
+		console.log(this.$store.state.info.soldStatusRowOpacity);
+		document.documentElement.style.setProperty('--pmbn-sold-status-row-opacity', (this.$store.state.info.soldStatusRowOpacity / 100));
 	},
 }
 </script>
@@ -152,10 +165,22 @@ export default {
 	.el-form-item__label:not(.pmbn-preview-toggle .el-form-item__label) {
 		width: 150px;
 	}
+	.el-overlay-dialog {
+		padding: 20px;
+	}
+	.el-dialog {
+		max-width: 1000px;
+		--el-dialog-title-font-size: 30px;
+	}
+	.el-dialog__title {
+		font-weight: bold;
+	}
 
 	/* ELEMENT PLUS WP FIXES */
 	.pmbn-app-container input.el-input__inner,
-	.pmbn-app-container input.el-input__inner:focus {
+	.pmbn-app-container input.el-input__inner:focus,
+	.pmbn-app-container input.el-select__input,
+	.pmbn-app-container input.el-select__input:focus {
 		border: none;
 		padding: 0px;
 		outline: none;

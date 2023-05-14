@@ -19,6 +19,22 @@
 		<el-form-item :label="$i18n('Living area')">
 			<el-input-number v-model="group.living_area" :min="0" :precision="2" /><span class="pmbn-m2">m<sup>2</sup></span>
 		</el-form-item>
+		<el-form-item :label="$i18n('Outdoor types')">
+			<el-select
+				v-model="group.outdoor_types"
+				filterable
+				multiple
+				allow-create
+				style="width: 100%;"
+			>
+				<el-option
+					v-for="(outdoorType, otindex) in $store.getters['groupOutdoorTypes']"
+					:key="otindex"
+					:label="outdoorType"
+					:value="outdoorType"
+				/>
+			</el-select>
+		</el-form-item>
 		<el-form-item :label="$i18n('Garden')">
 			<el-input-number v-model="group.garden" :min="0" :precision="2" /><span class="pmbn-m2">m<sup>2</sup></span>
 		</el-form-item>
@@ -72,6 +88,9 @@
 		</el-form-item>
 		<el-form-item :label="$i18n('Fact sheet')">
 			<file-field v-model="group.factsheet" />
+		</el-form-item>
+		<el-form-item :label="$i18n('Blueprints')">
+			<gallery-field v-model="group.blueprints" />
 		</el-form-item>
 		<el-form-item :label="$i18n('Apartment images')">
 			<gallery-field v-model="group.images" />

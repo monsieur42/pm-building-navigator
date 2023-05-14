@@ -11,6 +11,9 @@
 				<el-form-item :label="$i18n('Main color')">
 					<el-color-picker v-model="$store.state.building.mainColor" />
 				</el-form-item>
+				<el-form-item :label="$i18n('Sold status row opacity')">
+					<el-slider v-model="$store.state.info.soldStatusRowOpacity" />
+				</el-form-item>
 				<el-form-item :label="$i18n('Change SVG')">
 					<el-upload
 						ref="changeSVG"
@@ -54,7 +57,7 @@
 					class="pmbn-group-fields-draggable"
 				>
 					<template #item="{ element }">
-						<el-form-item class="pmbn-group-fields-item" :label="($store.getters['groupFieldNames']($i18n)[element.field])? $store.getters['groupFieldNames']($i18n)[element.field] : element.field">
+						<el-form-item class="pmbn-group-fields-item" :label="($store.getters['groupFieldNames'][element.field])? $store.getters['groupFieldNames'][element.field] : element.field">
 							<el-tooltip effect="dark" :content="$i18n('Display in table column')" placement="top" :hide-after="0">
 								<el-button 
 									:type="($store.getters['infoTableColumns'].includes(element.field))? 'success' : 'default' " 
@@ -73,7 +76,7 @@
 									<el-icon><Tickets /></el-icon>
 								</el-button>
 							</el-tooltip>
-							<el-tooltip effect="dark" :content="$i18n('Display as filter option')" placement="top" :hide-after="0" v-if="!['registration_url', 'factsheet', 'images'].includes(element.field)">
+							<el-tooltip effect="dark" :content="$i18n('Display as filter option')" placement="top" :hide-after="0" v-if="!['registration_url', 'factsheet', 'images', 'blueprints'].includes(element.field)">
 								<el-button 
 									:type="($store.getters['infoFilterFields'].includes(element.field))? 'success' : 'default' " 
 									circle 
@@ -82,6 +85,7 @@
 									<el-icon><Operation /></el-icon>
 								</el-button>
 							</el-tooltip>
+							<el-input v-model="$store.state.info.groupFieldNames[element.field]" class="group-field-name" :placeholder="$store.getters['groupFieldNames'][element.field]"/>
 						</el-form-item>
 					</template>
 				</draggable>
@@ -195,6 +199,10 @@ export default {
 <style scoped>
 	.el-upload__tip {
 		line-height: 1.1;
+	}
+	.group-field-name {
+		width: auto;
+		margin-left: 10px;
 	}
 </style>
 <style>

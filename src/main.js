@@ -27,19 +27,21 @@ const event_pmbn_before_init = new Event('pmbn_before_init');
 window.dispatchEvent(event_pmbn_before_init);
 
 lodash.forEach(appContainers, (appContainer) => {
-	const store = createAppStore();
+	
 	const pluginAPI = createPluginAPI();
 
 	const appEventBus = eventBus();
 	const appID = (appContainer.getAttribute('data-id'))? appContainer.getAttribute('data-id') : uuidv4()
 	
-	createApp(App)
-		.use(store)
+	let _app = createApp(App)
+		.use(i18n);
+	
+	const store = createAppStore();
+	_app.use(store)
 		.use(pluginAPI, {
 			id: appID,
 			eventBus: appEventBus,
 		})
-		.use(i18n, window.pmbn.i18n)
 		.use(ElementPlus)
 		.mount(appContainer);
 

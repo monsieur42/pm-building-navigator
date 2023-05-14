@@ -1,4 +1,20 @@
 <template>
+	<div class="floor-nav">
+		<el-button-group>
+			<el-button
+				:disabled="$store.state.editor.activeFloor === 0"
+				@click="$store.dispatch('setActiveFloor', ($store.state.editor.activeFloor - 1))"
+			>
+				<el-icon class="el-icon--left"><ArrowLeft /></el-icon>{{$i18n('Previous Floor')}}
+			</el-button>
+			<el-button
+				:disabled="$store.state.editor.activeFloor >= $store.state.building.floors.length - 1"
+				@click="$store.dispatch('setActiveFloor', ($store.state.editor.activeFloor + 1))"
+			>
+				{{$i18n('Next Floor')}}<el-icon class="el-icon--right"><ArrowRight /></el-icon>
+			</el-button>
+		</el-button-group>
+	</div>
 	<el-form-item :label="$i18n('Passive')">
 		<el-switch
 			v-model="floor.passive"
@@ -16,11 +32,11 @@
 </template>
 
 <script>
-import { Check, Close } from '@element-plus/icons-vue'
+import { Check, Close, ArrowLeft, ArrowRight} from '@element-plus/icons-vue'
 
 export default {
 	name: 'Editor',
-	components: {},
+	components: {ArrowLeft, ArrowRight},
 	data: function(){
 		return {
 
@@ -44,5 +60,9 @@ export default {
 </script>
 
 <style scoped>
-	
+	.floor-nav {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 20px;
+	}
 </style>

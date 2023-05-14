@@ -2,6 +2,7 @@ import { createStore } from 'vuex';
 import { toRaw } from 'vue';
 import _ from 'lodash';
 import $ from 'jquery';
+import {i18n} from '@/services/i18n.js';
 
 export default function createAppStore() {
 	return createStore({
@@ -26,10 +27,12 @@ export default function createAppStore() {
 			info: {
 				tableColumns: ['name', 'floor'],
 				detailsFields: ['name', 'floor'],
+				groupFieldNames: {},
 				filterFields: [],
 				fieldOrder: [],
 				currency: '',
 				rentPricePeriod: '',
+				soldStatusRowOpacity: 50,
 			},
 		},
 		mutations: {
@@ -183,7 +186,7 @@ export default function createAppStore() {
 				context.commit('loadInfo', _.merge(context.state.info, infoState));
 
 				let defaultFieldOrder = context.getters['groupFields']();
-				context.state.info.fieldOrder = _.uniq(_.merge(defaultFieldOrder, context.state.info.fieldOrder));
+				context.state.info.fieldOrder = _.uniq(_.concat(context.state.info.fieldOrder, defaultFieldOrder));
 			},
 			setMode(context, mode){
 				context.commit('setMode', mode);
@@ -191,6 +194,8 @@ export default function createAppStore() {
 
 
 			setActiveFloor(context, index){
+				index = (index >= 0)? index : 0;
+				index = (index <= context.state.building.floors.length - 1)? index : context.state.building.floors.length - 1; 
 				context.commit('setActiveFloor', index);
 			},
 
@@ -321,6 +326,7 @@ export default function createAppStore() {
 
 						rooms: 0,
 						living_area: 0,
+						outdoor_types: [],
 						garden: 0,
 						terrace: 0,
 						balcony: 0,
@@ -333,31 +339,33 @@ export default function createAppStore() {
 						status: null,
 						registration_url: null,
 						factsheet: null,
+						blueprints: [],
 						images: [],
 					};
 				};
 			},
-			groupFieldNames(){
-				return ($i18n) => {
-					return {
-						name: $i18n('Apartment name'),
-						rooms: $i18n('Number of rooms'),
-						living_area: $i18n('Living area'),
-						garden: $i18n('Garden'),
-						terrace: $i18n('Terrace'),
-						balcony: $i18n('Balcony'),
-						sale_price: $i18n('Sale price'),
-						rent_price: $i18n('Rent price'),
-						rent_overheads: $i18n('Overheads'),
-						available_from: $i18n('Available from'),
-						status: $i18n('Status'),
-						registration_url: $i18n('Registration URL'),
-						factsheet: $i18n('Fact sheet'),
-						images: $i18n('Apartment images'),
-						floor: $i18n('Floor name'),
-						floorIndex: $i18n('Floor index'),
-					};
+			groupFieldNames(state){
+				let defaults = {
+					name: i18n('Apartment name'),
+					rooms: i18n('Number of rooms'),
+					living_area: i18n('Living area'),
+					outdoor_types: i18n('Outdoor types'),
+					garden: i18n('Garden'),
+					terrace: i18n('Terrace'),
+					balcony: i18n('Balcony'),
+					sale_price: i18n('Sale price'),
+					rent_price: i18n('Rent price'),
+					rent_overheads: i18n('Overheads'),
+					available_from: i18n('Available from'),
+					status: i18n('Status'),
+					registration_url: i18n('Registration URL'),
+					factsheet: i18n('Fact sheet'),
+					blueprints: i18n('Blueprints'),
+					images: i18n('Apartment images'),
+					floor: i18n('Floor name'),
+					floorIndex: i18n('Floor index'),
 				};
+				return _.merge(defaults, _.pickBy(state.info.groupFieldNames, (gfn) => !_.isEmpty(gfn) ));
 			},
 			groupFields(state, getters){
 				return () => {
@@ -405,6 +413,9 @@ export default function createAppStore() {
 				};
 				//return _.compact(_.uniq(_.map(getters['properties'], _.property('status'))));
 			},
+			groupOutdoorTypes(state, getters){
+				return _.uniq(_.flatten(getters['groupFieldUsed']('outdoor_types')));
+			},
 
 			selectedGroup(state, getters){
 				return (state.editor.selectedGroup)? getters['group'](state.editor.selectedGroup.floor, state.editor.selectedGroup.group) : null;
@@ -437,7 +448,7 @@ export default function createAppStore() {
 			groupFieldUsed(state, getters){
 				let properties = getters['properties'];
 				return (field) => {
-					return _.uniq(_.map(properties, field));
+					return _.uniq(_.filter(_.map(properties, field), (v) => !_.isEmpty(v)));
 				};
 			},
 		}
