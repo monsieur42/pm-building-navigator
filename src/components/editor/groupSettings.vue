@@ -88,7 +88,7 @@
 		<el-form-item :label="$i18n('Fact sheet')">
 			<file-field v-model="group.factsheet" />
 		</el-form-item>
-		<el-form-item :label="$i18n('Blueprints')">
+		<el-form-item :label="$i18n('Floor plan')">
 			<gallery-field v-model="group.blueprints" />
 		</el-form-item>
 		<el-form-item :label="$i18n('Apartment images')">

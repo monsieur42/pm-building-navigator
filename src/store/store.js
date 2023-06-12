@@ -360,7 +360,7 @@ export default function createAppStore() {
 					status: i18n('Status'),
 					registration_url: i18n('Registration URL'),
 					factsheet: i18n('Fact sheet'),
-					blueprints: i18n('Blueprints'),
+					blueprints: i18n('Floor plan'),
 					images: i18n('Apartment images'),
 					floor: i18n('Floor name'),
 					floorIndex: i18n('Floor index'),
