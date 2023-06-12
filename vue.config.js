@@ -12,13 +12,4 @@ module.exports = {
       chunkFilename: 'pmbn-app-vendors.css'
     }
   },
-  /*devServer: {
-    public: 'http://localhost:8080',
-    disableHostCheck: true,
-    headers: {
-      'Access-Control-Allow-Origin': 'http://local.wptest.hu',
-      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
-    }
-  }*/
 }

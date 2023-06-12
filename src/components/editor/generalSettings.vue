@@ -192,6 +192,16 @@ export default {
 			},
 			deep: false,
 		},
+		'$store.state.loaded': {
+			handler(loaded){
+				if(loaded){
+					this.levelSpacingMax = this.$store.getters['levelSpacing'] * 2;
+				}
+			},
+		},
+	},
+	mounted(){
+		this.levelSpacingMax = this.$store.getters['levelSpacing'] * 2;
 	},
 }
 </script>
