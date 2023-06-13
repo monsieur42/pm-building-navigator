@@ -44,6 +44,9 @@
 		<el-form-item :label="$i18n('Balcony')">
 			<el-input-number v-model="group.balcony" :min="0" :precision="2" /><span class="pmbn-m2">m<sup>2</sup></span>
 		</el-form-item>
+		<el-form-item :label="$i18n('Basement')">
+			<el-input-number v-model="group.basement" :min="0" :precision="2" /><span class="pmbn-m2">m<sup>2</sup></span>
+		</el-form-item>
 		<el-form-item :label="$i18n('Sale price')">
 			<el-row class="pmbn-price">
 				<el-input-number v-model="group.sale_price" :min="0" :precision="2"/>
@@ -52,7 +55,13 @@
 		</el-form-item>
 		<el-form-item :label="$i18n('Rent price')">
 			<el-row class="pmbn-price">
-				<el-input-number v-model="group.rent_price" :min="0" :precision="2"/>
+				<el-input-number v-model="group.rent_price" :min="0" :precision="2"  />
+				<span class="pmbn-price-suffix">{{$store.state.info.currency}} / {{$store.state.info.rentPricePeriod}}</span>
+			</el-row>
+		</el-form-item>
+		<el-form-item :label="$i18n('Net rent')">
+			<el-row class="pmbn-price">
+				<el-input-number v-model="group.net_rent" :min="0" :precision="2"/>
 				<span class="pmbn-price-suffix">{{$store.state.info.currency}} / {{$store.state.info.rentPricePeriod}}</span>
 			</el-row>
 		</el-form-item>

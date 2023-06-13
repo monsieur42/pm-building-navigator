@@ -187,6 +187,9 @@ export default function createAppStore() {
 
 				let defaultFieldOrder = context.getters['groupFields']();
 				context.state.info.fieldOrder = _.uniq(_.concat(context.state.info.fieldOrder, defaultFieldOrder));
+				if(_.isEmpty(context.state.info.groupFieldNames)){
+					context.state.info.groupFieldNames = {};
+				}
 			},
 			setMode(context, mode){
 				context.commit('setMode', mode);
@@ -330,9 +333,11 @@ export default function createAppStore() {
 						garden: 0,
 						terrace: 0,
 						balcony: 0,
+						basement: 0,
 
 						sale_price: 0,
 						rent_price: 0,
+						net_rent: 0,
 						rent_overheads: 0,
 
 						available_from: null,
@@ -353,8 +358,10 @@ export default function createAppStore() {
 					garden: i18n('Garden'),
 					terrace: i18n('Terrace'),
 					balcony: i18n('Balcony'),
+					basement: i18n('Basement'),
 					sale_price: i18n('Sale price'),
 					rent_price: i18n('Rent price'),
+					net_rent: i18n('Net rent'),
 					rent_overheads: i18n('Overheads'),
 					available_from: i18n('Available from'),
 					status: i18n('Status'),

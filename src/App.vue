@@ -121,7 +121,7 @@ export default {
 			deep: false,
 		},
 		'$store.state.info.soldStatusRowOpacity': {
-			handler(newVal){console.log('asdqwe');
+			handler(newVal){
 				document.documentElement.style.setProperty('--pmbn-sold-status-row-opacity', (newVal / 100));
 			},
 			deep: false,

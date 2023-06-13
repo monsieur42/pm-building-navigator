@@ -76,6 +76,16 @@
 					:format-tooltip="(v) => v+'m²'"
 				/>
 			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('basement')" style="padding: 0px 10px;">
+				<label>{{$i18n('Basement')}}</label>
+				<el-slider
+					v-model="filters.basement"
+					range
+					:min="this.$store.getters['groupFieldMinMax']('basement')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('basement')[1]"
+					:format-tooltip="(v) => v+'m²'"
+				/>
+			</div>
 			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('sale_price')" style="padding: 0px 10px;">
 				<label>{{$i18n('Sale price')}}</label>
 				<el-slider
@@ -95,6 +105,17 @@
 					:step="calcSteps(this.$store.getters['groupFieldMinMax']('rent_price'))"
 					:min="this.$store.getters['groupFieldMinMax']('rent_price')[0]"
 					:max="this.$store.getters['groupFieldMinMax']('rent_price')[1]"
+					:format-tooltip="formatPrice"
+				/>
+			</div>
+			<div class="pmbn-info-filter-wrapper -half" v-if="$store.getters['infoFilterFields'].includes('net_rent')" style="padding: 0px 10px;">
+				<label>{{$i18n('Net rent')}}</label>
+				<el-slider
+					v-model="filters.net_rent"
+					range
+					:step="calcSteps(this.$store.getters['groupFieldMinMax']('net_rent'))"
+					:min="this.$store.getters['groupFieldMinMax']('net_rent')[0]"
+					:max="this.$store.getters['groupFieldMinMax']('net_rent')[1]"
 					:format-tooltip="formatPrice"
 				/>
 			</div>
@@ -178,8 +199,8 @@
 					<div class="pmbn-table-cell" :class="cellClasses(scope.row, groupField, findex)">
 						<span class="pmbn-resp-cell-label" v-if="findex > 0">{{getColumnNames(groupField)}}: </span>
 						<el-icon v-if="findex === 0"><Search /></el-icon>
-						<span v-if="['living_area','garden','terrace','balcony'].includes(groupField)">{{ scope.row[groupField] }} m<sup>2</sup></span>
-						<span v-else-if="['sale_price','rent_price','rent_overheads'].includes(groupField)">{{formatPrice(scope.row[groupField])}}</span>
+						<span v-if="['living_area','garden','terrace','balcony','basement'].includes(groupField)">{{ scope.row[groupField] }} m<sup>2</sup></span>
+						<span v-else-if="['sale_price','rent_price','rent_overheads', 'net_rent'].includes(groupField)">{{formatPrice(scope.row[groupField])}}</span>
 						<span v-else-if="groupField === 'available_from'">{{formatDate(scope.row[groupField])}}</span>
 						<span v-else-if="groupField === 'status'">{{(($store.getters['groupStatuses']($i18n)[scope.row[groupField]])? $store.getters['groupStatuses']($i18n)[scope.row[groupField]] : '-')}}</span>
 						<span v-else-if="groupField === 'registration_url'">
@@ -238,8 +259,8 @@
 				<el-table-column prop="value" :fit="true">
 					<template #default="scope">
 						<div class="pmbn-table-cell">
-							<span v-if="['living_area','garden','terrace','balcony'].includes(scope.row.key)">{{ scope.row.value }} m<sup>2</sup></span>
-							<span v-else-if="['sale_price','rent_price','rent_overheads'].includes(scope.row.key)">{{formatPrice(scope.row.value)}}</span>
+							<span v-if="['living_area','garden','terrace','balcony','basement'].includes(scope.row.key)">{{ scope.row.value }} m<sup>2</sup></span>
+							<span v-else-if="['sale_price','rent_price','rent_overheads', 'net_rent'].includes(scope.row.key)">{{formatPrice(scope.row.value)}}</span>
 							<span v-else-if="scope.row.key === 'available_from'">{{formatDate(scope.row.value)}}</span>
 							<span v-else-if="scope.row.key === 'status'">{{(($store.getters['groupStatuses']($i18n)[scope.row.value])? $store.getters['groupStatuses']($i18n)[scope.row.value] : '-')}}</span>
 							<span v-else-if="scope.row.key === 'outdoor_types'">{{scope.row.value.join(', ')}}</span>
@@ -322,8 +343,10 @@ export default {
 				garden: this.$store.getters['groupFieldMinMax']('garden'),
 				terrace: this.$store.getters['groupFieldMinMax']('terrace'),
 				balcony: this.$store.getters['groupFieldMinMax']('balcony'),
+				basement: this.$store.getters['groupFieldMinMax']('basement'),
 				sale_price: this.$store.getters['groupFieldMinMax']('sale_price'),
 				rent_price: this.$store.getters['groupFieldMinMax']('rent_price'),
+				net_rent: this.$store.getters['groupFieldMinMax']('net_rent'),
 				rent_overheads: this.$store.getters['groupFieldMinMax']('rent_overheads'),
 				available_from: null,
 				status: null,
@@ -401,6 +424,13 @@ export default {
 					}
 				}
 
+				//BASEMENT
+				if(this.$store.getters['infoFilterFields'].includes('basement')){
+					if(property.basement < this.filters.basement[0] || property.basement > this.filters.basement[1]){
+						return false;
+					}
+				}
+
 				//SALE PRICE
 				if(this.$store.getters['infoFilterFields'].includes('sale_price')){
 					if(property.sale_price < this.filters.sale_price[0] || property.sale_price > this.filters.sale_price[1]){
@@ -411,6 +441,13 @@ export default {
 				//RENT PRICE
 				if(this.$store.getters['infoFilterFields'].includes('rent_price')){
 					if(property.rent_price < this.filters.rent_price[0] || property.rent_price > this.filters.rent_price[1]){
+						return false;
+					}
+				}
+
+				//NET RENT
+				if(this.$store.getters['infoFilterFields'].includes('net_rent')){
+					if(property.net_rent < this.filters.net_rent[0] || property.net_rent > this.filters.net_rent[1]){
 						return false;
 					}
 				}
@@ -594,7 +631,8 @@ export default {
 	.pmbn-table-cell.-cell-living_area,
 	.pmbn-table-cell.-cell-garden,
 	.pmbn-table-cell.-cell-terrace,
-	.pmbn-table-cell.-cell-balcony {
+	.pmbn-table-cell.-cell-balcony,
+	.pmbn-table-cell.-cell-basement {
 		justify-content: flex-end;
 		padding-right: 10px;
 	}
