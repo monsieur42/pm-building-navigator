@@ -175,6 +175,16 @@ export default {
 		font-weight: bold;
 	}
 
+	.el-table .el-table__cell {
+		padding: 3px 0px;
+	}
+	.el-table .cell {
+		padding: 0px 3px;
+	}
+	.el-table .el-table__cell:first-child .cell {
+		padding-left: 10px;
+	}
+
 	/* ELEMENT PLUS WP FIXES */
 	.pmbn-app-container input.el-input__inner,
 	.pmbn-app-container input.el-input__inner:focus,

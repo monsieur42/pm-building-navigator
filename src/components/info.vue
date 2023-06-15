@@ -278,14 +278,14 @@
 					rel="noopener noreferrer"
 					:disabled="property.status !== 'available'"
 					v-if="$store.getters['infoDetailsFields'].includes('registration_url')"
-				><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$i18n('Online Registration')}}</el-button>
+				><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$store.getters['groupFieldNames']['registration_url'] ?? $i18n('Online Registration')}}</el-button>
 				<el-button 
 					plain
 					tag="a"
 					:href="property.factsheet.url"
 					target="_blank"
 					v-if="$store.getters['infoDetailsFields'].includes('factsheet') && property.factsheet && property.factsheet.url"
-				><el-icon style="margin-right: 5px;"><Document /></el-icon> {{$i18n('Fact sheet')}}</el-button>
+				><el-icon style="margin-right: 5px;"><Document /></el-icon> {{$store.getters['groupFieldNames']['factsheet'] ?? $i18n('Fact sheet')}}</el-button>
 			</div>
 			<div class="pmbn-popup-details-image-slider" v-if="$store.getters['infoDetailsFields'].includes('blueprints') && property.blueprints && property.blueprints.length > 0">
 				<swiper
