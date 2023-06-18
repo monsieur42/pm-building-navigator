@@ -197,8 +197,8 @@ export default function createAppStore() {
 				context.state.info.fieldOrder = _.uniq(_.concat(context.state.info.fieldOrder, defaultFieldOrder));
 
 				let defaultApartmentOrder = [];
-				_.forEach(context.getters['floors'], (floor, fi) => {
-					_.forEach(floor.groups, (group, gi) => {
+				_.forEach(context.getters['floors'], (floor) => {
+					_.forEach(floor.groups, (group) => {
 						if(group.isApartment){
 							defaultApartmentOrder.push(group.id);
 						}
@@ -441,8 +441,8 @@ export default function createAppStore() {
 			apartmentById(state, getters){
 				return (id) => {
 					let apartment = null;
-					_.forEach(getters['floors'], (floor, fi) => {
-						_.forEach(floor.groups, (group, gi) => {
+					_.forEach(getters['floors'], (floor) => {
+						_.forEach(floor.groups, (group) => {
 							if(group.id === id){
 								apartment = group;
 								return false;
@@ -506,8 +506,8 @@ export default function createAppStore() {
 				});
 
 				let defaultApartmentOrder = [];
-				_.forEach(getters['floors'], (floor, fi) => {
-					_.forEach(floor.groups, (group, gi) => {
+				_.forEach(getters['floors'], (floor) => {
+					_.forEach(floor.groups, (group) => {
 						if(group.isApartment){
 							defaultApartmentOrder.push(group.id);
 						}
