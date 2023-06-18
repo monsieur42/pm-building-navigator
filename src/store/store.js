@@ -3,6 +3,7 @@ import { toRaw } from 'vue';
 import _ from 'lodash';
 import $ from 'jquery';
 import {i18n} from '@/services/i18n.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function createAppStore() {
 	return createStore({
@@ -28,8 +29,10 @@ export default function createAppStore() {
 				tableColumns: ['name', 'floor'],
 				detailsFields: ['name', 'floor'],
 				groupFieldNames: {},
+				groupFieldValueOverrides: {},
 				filterFields: [],
 				fieldOrder: [],
+				apartmentOrder: [],
 				currency: '',
 				rentPricePeriod: '',
 				soldStatusRowOpacity: 50,
@@ -62,7 +65,6 @@ export default function createAppStore() {
 				state.editor.selectedGroup = payload;
 			},
 
-
 			setActiveTab(state, tabName){
 				state.editor.activeTab = tabName;
 			},
@@ -81,6 +83,9 @@ export default function createAppStore() {
 			},
 			setFieldOrder(state, fieldOrder){
 				state.info.fieldOrder = fieldOrder;
+			},
+			setApartmentOrder(state, apartmentOrder){
+				state.info.apartmentOrder = apartmentOrder;
 			},
 		},
 		actions: {
@@ -173,6 +178,9 @@ export default function createAppStore() {
 
 					_.forEach(floor.groups, (group, gi) => {
 						floor.groups[gi] = _.merge(context.getters['defaultGroup'](), group);
+						if(!floor.groups[gi].id){
+							floor.groups[gi].id = uuidv4();
+						}
 					});
 					buildingState.floors[fi] = floor;
 				});
@@ -187,8 +195,23 @@ export default function createAppStore() {
 
 				let defaultFieldOrder = context.getters['groupFields']();
 				context.state.info.fieldOrder = _.uniq(_.concat(context.state.info.fieldOrder, defaultFieldOrder));
+
+				let defaultApartmentOrder = [];
+				_.forEach(context.getters['floors'], (floor, fi) => {
+					_.forEach(floor.groups, (group, gi) => {
+						if(group.isApartment){
+							defaultApartmentOrder.push(group.id);
+						}
+					});
+				});
+				context.state.info.apartmentOrder = _.uniq(_.concat(context.state.info.apartmentOrder, defaultApartmentOrder));
+
 				if(_.isEmpty(context.state.info.groupFieldNames)){
 					context.state.info.groupFieldNames = {};
+				}
+
+				if(_.isEmpty(context.state.info.groupFieldValueOverrides)){
+					context.state.info.groupFieldValueOverrides = {};
 				}
 			},
 			setMode(context, mode){
@@ -234,6 +257,9 @@ export default function createAppStore() {
 			},
 			setFieldOrder(context, fieldOrder){
 				context.commit('setFieldOrder', fieldOrder);
+			},
+			setApartmentOrder(context, apartmentOrder){
+				context.commit('setApartmentOrder', apartmentOrder);
 			},
 		},
 		getters: {
@@ -384,6 +410,11 @@ export default function createAppStore() {
 					return fields;
 				};
 			},
+			groupFieldValueOverride(state){
+				return (fieldName) => {
+					return state.info.groupFieldValueOverrides[fieldName] ?? null;
+				};
+			},
 			sortedGroupFields(state, getters){
 				return _.sortBy(getters['groupFields'](), key => _.indexOf(state.info.fieldOrder, key));
 			},
@@ -405,7 +436,25 @@ export default function createAppStore() {
 					});
 				});
 
-				return properties;
+				return _.sortBy(properties, p => _.indexOf(state.info.apartmentOrder, p.id));
+			},
+			apartmentById(state, getters){
+				return (id) => {
+					let apartment = null;
+					_.forEach(getters['floors'], (floor, fi) => {
+						_.forEach(floor.groups, (group, gi) => {
+							if(group.id === id){
+								apartment = group;
+								return false;
+							}
+						});
+
+						if(apartment){
+							return false;
+						}
+					});
+					return apartment;
+				};
 			},
 			groupStatuses(state, getters){
 				return ($i18n, usedOnly) => {
@@ -414,6 +463,7 @@ export default function createAppStore() {
 						available: $i18n('Available'),
 						sold: $i18n('Sold'),
 						rented: $i18n('Rented'),
+						reserved: $i18n('Reserved'),
 					};
 
 					return (usedOnly)? _.pickBy(statuses, (l, v) => used.includes(v)) : statuses;
@@ -445,6 +495,26 @@ export default function createAppStore() {
 			},
 			fieldOrder(state){
 				return state.info.fieldOrder;
+			},
+			apartmentOrder(state, getters){
+				let apartmentOrder = [];
+				_.forEach(state.info.apartmentOrder, (id) => {
+					let apartment = getters['apartmentById'](id);
+					if(apartment?.isApartment){
+						apartmentOrder.push(id);
+					}
+				});
+
+				let defaultApartmentOrder = [];
+				_.forEach(getters['floors'], (floor, fi) => {
+					_.forEach(floor.groups, (group, gi) => {
+						if(group.isApartment){
+							defaultApartmentOrder.push(group.id);
+						}
+					});
+				});
+
+				return _.uniq(_.concat(apartmentOrder, defaultApartmentOrder));
 			},
 			groupFieldMinMax(state, getters){
 				let properties = getters['properties'];

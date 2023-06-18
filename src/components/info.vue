@@ -199,34 +199,39 @@
 					<div class="pmbn-table-cell" :class="cellClasses(scope.row, groupField, findex)">
 						<span class="pmbn-resp-cell-label" v-if="findex > 0">{{getColumnNames(groupField)}}: </span>
 						<el-icon v-if="findex === 0"><Search /></el-icon>
-						<span v-if="['living_area','garden','terrace','balcony','basement'].includes(groupField)">{{ scope.row[groupField] }} m<sup>2</sup></span>
-						<span v-else-if="['sale_price','rent_price','rent_overheads', 'net_rent'].includes(groupField)">{{formatPrice(scope.row[groupField])}}</span>
-						<span v-else-if="groupField === 'available_from'">{{formatDate(scope.row[groupField])}}</span>
-						<span v-else-if="groupField === 'status'">{{(($store.getters['groupStatuses']($i18n)[scope.row[groupField]])? $store.getters['groupStatuses']($i18n)[scope.row[groupField]] : '-')}}</span>
-						<span v-else-if="groupField === 'registration_url'">
-							<el-button 
-								plain
-								tag="a"
-								:href="scope.row[groupField]"
-								target="_blank"
-								rel="noopener noreferrer"
-								:disabled="scope.row.status !== 'available'"
-							><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$i18n('Online Registration')}}</el-button>
+
+						<span v-if="$store.getters['groupFieldValueOverride'](groupField)" class="pmbn-cell-value-override">{{ $store.getters['groupFieldValueOverride'](groupField) }}</span>
+						<span v-else>
+							<span v-if="['living_area','garden','terrace','balcony','basement'].includes(groupField)">{{ scope.row[groupField] }} m<sup>2</sup></span>
+							<span v-else-if="['sale_price','rent_price','rent_overheads', 'net_rent'].includes(groupField)">{{formatPrice(scope.row[groupField])}}</span>
+							<span v-else-if="groupField === 'available_from'">{{formatDate(scope.row[groupField])}}</span>
+							<span v-else-if="groupField === 'status'">{{(($store.getters['groupStatuses']($i18n)[scope.row[groupField]])? $store.getters['groupStatuses']($i18n)[scope.row[groupField]] : '-')}}</span>
+							<span v-else-if="groupField === 'registration_url'">
+								<el-button 
+									plain
+									tag="a"
+									:href="scope.row[groupField]"
+									target="_blank"
+									rel="noopener noreferrer"
+									:disabled="scope.row.status !== 'available'"
+								><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$store.getters['groupFieldNames']['registration_url'] ?? $i18n('Online Registration')}}</el-button>
+							</span>
+							<span v-else-if="groupField === 'factsheet'">
+								<el-button 
+									plain
+									tag="a"
+									:href="scope.row[groupField].url"
+									v-if="scope.row[groupField] && scope.row[groupField].url"
+									target="_blank"
+								><el-icon style="margin-right: 5px;"><Document /></el-icon> {{$store.getters['groupFieldNames']['factsheet'] ?? $i18n('Fact sheet')}}</el-button>
+							</span>
+							<span v-else-if="['images','blueprints'].includes(groupField)" class="pmbn-table-thumbnails">
+								<div class="pmbn-table-thumbnail" :style="{'background-image': 'url(\''+((image.sizes.thumbnail && image.sizes.thumbnail.url)? image.sizes.thumbnail.url : image.url)+'\')'}" v-for="(image, imgindex) in scope.row[groupField]" :key="imgindex"></div>
+							</span>
+							<span v-else-if="groupField === 'outdoor_types'">{{scope.row[groupField].join(', ')}}</span>
+							<span v-else>{{ scope.row[groupField] }}</span>
 						</span>
-						<span v-else-if="groupField === 'factsheet'">
-							<el-button 
-								plain
-								tag="a"
-								:href="scope.row[groupField].url"
-								v-if="scope.row[groupField] && scope.row[groupField].url"
-								target="_blank"
-							><el-icon style="margin-right: 5px;"><Document /></el-icon> {{$i18n('Fact sheet')}}</el-button>
-						</span>
-						<span v-else-if="['images','blueprints'].includes(groupField)" class="pmbn-table-thumbnails">
-							<div class="pmbn-table-thumbnail" :style="{'background-image': 'url(\''+((image.sizes.thumbnail && image.sizes.thumbnail.url)? image.sizes.thumbnail.url : image.url)+'\')'}" v-for="(image, imgindex) in scope.row[groupField]" :key="imgindex"></div>
-						</span>
-						<span v-else-if="groupField === 'outdoor_types'">{{scope.row[groupField].join(', ')}}</span>
-						<span v-else>{{ scope.row[groupField] }}</span>
+						
 						<span class="pmbn-resp-cell-coma" v-if="findex > 0 && findex < $store.getters['infoTableColumns'].length - 1">,</span>
 					</div>
 				</template>
@@ -761,7 +766,5 @@ export default {
 	.pmbn-app-info-container.-responsive .el-table--enable-row-hover.pmbn-info-table  .el-table__body tr.-highlight>td.el-table__cell {
 		background-color: transparent;
 	}
-
-
 
 </style>

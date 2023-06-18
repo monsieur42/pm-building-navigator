@@ -86,12 +86,30 @@
 								</el-button>
 							</el-tooltip>
 							<el-input v-model="$store.state.info.groupFieldNames[element.field]" class="group-field-name" :placeholder="$store.getters['groupFieldNames'][element.field]"/>
+							<el-input v-model="$store.state.info.groupFieldValueOverrides[element.field]" class="group-field-value-override" :placeholder="$i18n('Value override')"/>
 						</el-form-item>
 					</template>
 				</draggable>
-				
-
-
+			</el-collapse-item>
+			<el-collapse-item :title="$i18n('Apartments order')" name="apartments_order">
+				{{}}
+				<draggable
+					:component-data="{
+						type: 'transition-group',
+						name: !dragApartment ? 'flip-list' : null
+					}"
+					v-model="apartmentOrder"
+					v-bind="dragOptions"
+					@start="dragApartment = true"
+					@end="dragApartment = false"
+					item-key="order"
+					handle=".pmbn-apartment-sort-handle"
+					class="pmbn-apartment-sort-draggable"
+				>
+					<template #item="{ element }">
+						<div class="pmbn-apartment-sort-handle" v-if="$store.getters['apartmentById'](element.apartmentId)">{{$store.getters['apartmentById'](element.apartmentId).name}}</div>
+					</template>
+				</draggable>
 			</el-collapse-item>
 		</el-collapse>
 		
@@ -136,6 +154,11 @@ export default {
 			loadSortedGroupFields: false,
 			fieldOrder: this.$store.getters['fieldOrder'].map((field, index) => {
 				return { field, order: index + 1 };
+			}),
+			dragApartment: false,
+			loadSortedApartments: false,
+			apartmentOrder: this.$store.getters['apartmentOrder'].map((apartmentId, index) => {
+				return { apartmentId, order: index + 1 };
 			}),
 		};
 	},
@@ -192,6 +215,14 @@ export default {
 			},
 			deep: false,
 		},
+		apartmentOrder: {
+			handler(){
+				if(!this.loadSortedApartments){
+					this.$store.dispatch('setApartmentOrder', _.map(this.apartmentOrder, 'apartmentId'))
+				}
+			},
+			deep: false,
+		},
 		'$store.state.loaded': {
 			handler(loaded){
 				if(loaded){
@@ -203,6 +234,20 @@ export default {
 	mounted(){
 		this.levelSpacingMax = this.$store.getters['levelSpacing'] * 2;
 	},
+	created() {
+		this.$store.watch(
+			() => this.$store.getters.apartmentOrder,
+			() => {
+				this.loadSortedApartments = true;
+				this.apartmentOrder = this.$store.getters['apartmentOrder'].map((apartmentId, index) => {
+					return { apartmentId, order: index + 1 };
+				});
+				this.$nextTick(() => {
+					this.loadSortedApartments = false;
+				});
+			}
+		);
+	},
 }
 </script>
 
@@ -210,13 +255,17 @@ export default {
 	.el-upload__tip {
 		line-height: 1.1;
 	}
-	.group-field-name {
-		width: auto;
+	.group-field-name,
+	.group-field-value-override {
+		width: 134px;
 		margin-left: 10px;
 	}
 </style>
 <style>
 	.pmbn-group-fields-draggable .el-form-item__label {
+		cursor: move;
+	}
+	.pmbn-apartment-sort-handle {
 		cursor: move;
 	}
 </style>
