@@ -263,7 +263,8 @@
 				</el-table-column>
 				<el-table-column prop="value" :fit="true">
 					<template #default="scope">
-						<div class="pmbn-table-cell">
+						<div class="pmbn-table-cell" v-if="$store.getters['groupFieldValueOverride'](scope.row.key)"><span>{{ $store.getters['groupFieldValueOverride'](scope.row.key) }}</span></div>
+						<div class="pmbn-table-cell" v-else>
 							<span v-if="['living_area','garden','terrace','balcony','basement'].includes(scope.row.key)">{{ scope.row.value }} m<sup>2</sup></span>
 							<span v-else-if="['sale_price','rent_price','rent_overheads', 'net_rent'].includes(scope.row.key)">{{formatPrice(scope.row.value)}}</span>
 							<span v-else-if="scope.row.key === 'available_from'">{{formatDate(scope.row.value)}}</span>
@@ -282,17 +283,17 @@
 					target="_blank"
 					rel="noopener noreferrer"
 					:disabled="property.status !== 'available'"
-					v-if="$store.getters['infoDetailsFields'].includes('registration_url')"
+					v-if="$store.getters['infoDetailsFields'].includes('registration_url') && !$store.getters['groupFieldValueOverride']('registration_url')"
 				><el-icon style="margin-right: 5px;"><EditPen /></el-icon> {{$store.getters['groupFieldNames']['registration_url'] ?? $i18n('Online Registration')}}</el-button>
 				<el-button 
 					plain
 					tag="a"
 					:href="property.factsheet.url"
 					target="_blank"
-					v-if="$store.getters['infoDetailsFields'].includes('factsheet') && property.factsheet && property.factsheet.url"
+					v-if="$store.getters['infoDetailsFields'].includes('factsheet') && property.factsheet && property.factsheet.url  && !$store.getters['groupFieldValueOverride']('factsheet')"
 				><el-icon style="margin-right: 5px;"><Document /></el-icon> {{$store.getters['groupFieldNames']['factsheet'] ?? $i18n('Fact sheet')}}</el-button>
 			</div>
-			<div class="pmbn-popup-details-image-slider" v-if="$store.getters['infoDetailsFields'].includes('blueprints') && property.blueprints && property.blueprints.length > 0">
+			<div class="pmbn-popup-details-image-slider" v-if="$store.getters['infoDetailsFields'].includes('blueprints') && property.blueprints && property.blueprints.length > 0 && !$store.getters['groupFieldValueOverride']('blueprints')">
 				<swiper
 					:modules="swiperModules"
 					navigation
@@ -304,7 +305,7 @@
 					</swiper-slide>
 				</swiper>
 			</div>
-			<div class="pmbn-popup-details-image-slider" v-if="$store.getters['infoDetailsFields'].includes('images') && property.images && property.images.length > 0">
+			<div class="pmbn-popup-details-image-slider" v-if="$store.getters['infoDetailsFields'].includes('images') && property.images && property.images.length > 0 && !$store.getters['groupFieldValueOverride']('images')">
 				<swiper
 					:modules="swiperModules"
 					navigation
