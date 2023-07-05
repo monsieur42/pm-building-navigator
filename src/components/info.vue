@@ -301,7 +301,7 @@
 					:autoHeight="true"
 				>
 					<swiper-slide v-for="(image, bpindex) in property.blueprints" :key="bpindex" class="pmbn-image-slide">
-						<a :href="property.factsheet?.url ?? '#'" target="_blank"><img :src="((image.sizes.large && image.sizes.large.url)? image.sizes.large.url : image.url)" :alt="((image.alt)? image.alt : '')" /></a>
+						<a :href="property.factsheet?.url ?? '#'" target="_blank"><img :src="image.url" :alt="((image.alt)? image.alt : '')" /></a>
 					</swiper-slide>
 				</swiper>
 			</div>
